@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Login02Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
+import Link from "next/link";
 
 type NavbarProps = {
   onOpenSettings?: () => void;
@@ -39,11 +40,14 @@ export function Navbar({ onOpenSettings, hideLoginButton }: NavbarProps) {
             </Button>
           )}
           {!shouldHideLogin && (
-            <Button variant="main" onClick={() => router.push("/login")}>
+            <Link className="main-button" href="/login">
               <HugeiconsIcon icon={Login02Icon} size={20} strokeWidth={3} />
               <span className="hidden md:block">Login</span>
-            </Button>
+            </Link>
           )}
+          {/* {shouldHideLogin && (
+            
+          )} */}
         </div>
       </div>
     </nav>

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Button from "@/app/components/ui/Button";
+import { HeaderAuth } from "@/app/components/ui/HeaderAuth";
 
 type AuthField = {
   id: string;
-  label: string;
   type: "text" | "email" | "password";
   placeholder: string;
   autoComplete: string;
@@ -30,17 +30,11 @@ export function AuthFormCard({
 }: AuthFormCardProps) {
   return (
     <div className="w-full max-w-md rounded-4xl border border-gray-200 bg-white px-5 py-6 shadow-sm dark:border-gray-800/50 dark:bg-black/40">
-      <div className="mb-5 text-center border-b border-gray-200 pb-5">
-        <h1 className="text-3xl font-bold text-pink-500">{title}</h1>
-        <div className="text-sm text-gray-600">{description}</div>
-      </div>
+      <HeaderAuth title={title} description={description} />
 
-      <form className="space-y-4">
+      <form className="space-y-5">
         {fields.map((field) => (
           <div key={field.id} className="flex flex-col">
-            <label htmlFor={field.id} className="ms-3 text-sm text-gray-600 ">
-              {field.label}
-            </label>
             <input
               id={field.id}
               name={field.id}
@@ -64,7 +58,7 @@ export function AuthFormCard({
         </div>
       </form>
 
-      <p className="mt-5 text-center text-sm text-gray-600 dark:text-gray-300">
+      <p className="mt-10 text-center text-sm text-gray-500 dark:text-gray-300">
         {footerText}{" "}
         <Link href={footerHref} className="font-semibold text-pink-500 hover:underline">
           {footerLinkText}
