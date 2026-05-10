@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeInitializer } from "@/app/components/ui/ThemeInitializer";
+import { ProgressBarProvider } from "@/app/components/ui/ProgressBarProvider";
 
 export const metadata: Metadata = {
   title: "JAFIKA",
@@ -22,7 +24,12 @@ export default function RootLayout({
           href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ProgressBarProvider>
+          <ThemeInitializer />
+          {children}
+        </ProgressBarProvider>
+      </body>
     </html>
   );
 }

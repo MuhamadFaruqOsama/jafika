@@ -114,7 +114,7 @@ export function SettingsDrawer({
             </div>
           </button>
 
-          <button
+          {/* <button
             className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
             type="button"
             onClick={onClose}
@@ -128,7 +128,7 @@ export function SettingsDrawer({
                 Buat custom soal Anda sendiri.
               </small>
             </div>
-          </button>
+          </button> */}
 
           <button
             className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
