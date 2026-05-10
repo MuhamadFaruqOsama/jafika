@@ -29,7 +29,7 @@ export function AuthFormCard({
   footerHref,
 }: AuthFormCardProps) {
   return (
-    <div className="w-full max-w-md rounded-4xl border border-gray-200 bg-white px-5 py-6 shadow-sm dark:border-gray-800/50 dark:bg-black/40">
+    <div className="w-full max-w-md rounded-4xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800/50 dark:bg-black/40">
       <HeaderAuth title={title} description={description} />
 
       <form className="space-y-5">
@@ -51,14 +51,14 @@ export function AuthFormCard({
           <Button
             type="submit"
             variant="secondary"
-            className="w-full justify-center rounded-full text-base font-bold"
+            className="w-full justify-center rounded-full font-bold"
           >
             {submitLabel}
           </Button>
         </div>
       </form>
 
-      <p className="mt-10 text-center text-sm text-gray-500 dark:text-gray-300">
+      <p className="mt-10 text-center text-gray-500 dark:text-gray-300">
         {footerText}{" "}
         <Link href={footerHref} className="font-semibold text-pink-500 hover:underline">
           {footerLinkText}

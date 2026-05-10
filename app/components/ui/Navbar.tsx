@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Button from "./Button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Login02Icon, Settings01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft03Icon, Login02Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
@@ -45,9 +45,12 @@ export function Navbar({ onOpenSettings, hideLoginButton }: NavbarProps) {
               <span className="hidden md:block">Login</span>
             </Link>
           )}
-          {/* {shouldHideLogin && (
-            
-          )} */}
+          {shouldHideLogin && (
+            <Link className="main-button" href="/">
+              <HugeiconsIcon icon={ArrowLeft03Icon} size={20} strokeWidth={3} />
+              <span className="hidden md:block">Back</span>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

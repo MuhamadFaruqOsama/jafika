@@ -1,3 +1,6 @@
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 type SettingsDrawerProps = {
   open: boolean;
   onClose: () => void;
@@ -74,10 +77,10 @@ export function SettingsDrawer({
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="mb-5 flex items-center border-b border-gray-500 pb-4 dark:border-slate-600">
+        <div className="mb-5 pb-5 flex items-center justify-between border-b border-gray-500 dark:border-slate-600">
           <h5
             id="drawer-label"
-            className="inline-flex items-center gap-3 text-lg font-medium dark:text-gray-100"
+            className="inline-flex items-center gap-3 text-xl font-medium dark:text-gray-100"
           >
             <i className="hgi hgi-stroke hgi-settings-01" />
             <span>
@@ -86,11 +89,11 @@ export function SettingsDrawer({
           </h5>
           <button
             type="button"
-            className="absolute end-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
+            className="flex items-center justify-center h-9 w-9 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
             onClick={onClose}
             aria-label="Close menu"
           >
-            x
+            <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={3} />
           </button>
         </div>
 
