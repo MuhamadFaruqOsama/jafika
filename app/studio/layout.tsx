@@ -10,9 +10,11 @@ export default function RootLayout({
     return (
         <SidebarProvider>
         <AppSidebar />
-        <main>
-            <SidebarTrigger />
-            {children}
+        <main className="flex-1 min-w-0">
+            <SidebarTrigger className="ps-4 pt-4"/>
+            <div className="px-4 pt-4">
+                {children}
+            </div>
         </main>
         </SidebarProvider>
     )
