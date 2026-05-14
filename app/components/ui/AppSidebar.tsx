@@ -10,28 +10,32 @@ import { LinkAppSidebar } from "./LinkAppSidebar"
 import { BookBookmark02Icon, Clock02Icon, Home07Icon, Logout02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-const SIDEBAR_LINKS = [
+type SidebarLink = {
+  href: string
+  label: string
+  icon: React.ReactNode
+  type: "regular"
+}
+
+const ADMIN_URL = (process.env.ADMIN_URL || "/studio").replace(/\/+$/, "") || "/studio"
+
+const SIDEBAR_LINKS: SidebarLink[] = [
   {
-    href: "/",
+    href: ADMIN_URL,
     label: "home",
     icon: <HugeiconsIcon icon={Home07Icon} />,
     type: "regular",
   },
   {
-    href: "/soal",
+    href: `${ADMIN_URL}/soal`,
     label: "soal",
     icon: <HugeiconsIcon icon={BookBookmark02Icon} />,
-    type: "regular",
-  },
-  {
-    href: "/soal/history",
-    label: "history",
-    icon: <HugeiconsIcon icon={Clock02Icon} />,
     type: "regular",
   }
 ]
 
 export function AppSidebar() {
+  
   return (
     <Sidebar
       className="border-e border-gray-200"
