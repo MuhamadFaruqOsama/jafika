@@ -1,7 +1,7 @@
-import { AdminHeader } from "../components/ui/AdminHeader";
-import { AdminTable } from "../components/ui/AdminTable";
-import { LastQuestionCardAdmin } from "../components/ui/LastQuestionCardAdmin";
-import { TotalQuestionCardAdmin } from "../components/ui/TotalQuestionCardAdmin";
+import { AdminHeader } from "../components/ui/Admin/AdminHeader";
+import { AdminTable } from "../components/ui/Admin/AdminTable";
+import { LastQuestionCardAdmin } from "../components/ui/Admin/LastQuestionCardAdmin";
+import { TotalQuestionCardAdmin } from "../components/ui/Admin/TotalQuestionCardAdmin";
 
 export default function Dashboard() {
     return (
@@ -9,8 +9,8 @@ export default function Dashboard() {
             <AdminHeader title="Home" />
 
             <div className="grid grid-cols-3 gap-4 mt-4">
-                <div className="col-span-2">
-                    <div className="text-gray-900 mb-3">
+                <div className="col-span-2 border bg-white border-gray-200 p-2 rounded-lg">
+                    <div className="text-gray-900 my-3 text-lg font-medium flex items-center gap-3">
                         Pengguna yang Terakhir Mengerjakan Soal Anda
                     </div>
                     <AdminTable/>

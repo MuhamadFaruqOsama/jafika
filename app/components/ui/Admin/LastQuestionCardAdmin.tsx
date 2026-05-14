@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export function LastQuestionCardAdmin() {
     return (
-        <div className="border border-gray-200 w-full rounded-lg p-3 transition-all duration-150 hover:shadow-md">
+        <div className="bg-white border border-gray-200 w-full rounded-lg p-3 transition-all duration-150 hover:shadow-md">
             <div className="flex items-end gap-3">
                 <div className="w-14 h-14 bg-blue-400 rounded-md flex items-center justify-center text-white">
                     <HugeiconsIcon icon={DocumentValidationIcon} size={36} strokeWidth={2}/>
