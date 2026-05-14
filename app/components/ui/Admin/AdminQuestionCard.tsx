@@ -16,26 +16,26 @@ export function AdminQuestionCard() {
             <div className="flex justify-between items-center">
                 <div className="text-sm text-gray-600">08 May 2026</div>
                 <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <button
-                        className="p-2 flex items-center justify-center rounded-md hover:bg-gray-100 cursor-pointer bg-white transition-all duration-300"
-                    >
-                        <HugeiconsIcon 
-                            icon={MoreVerticalSquare01Icon} 
-                            size={20}
-                            />
-                    </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white border border-gray-200 p-2 border-none min-w-50">
-                    <DropdownMenuGroup>
-                        <DropdownMenuItem className="hover:bg-gray-100 p-2 cursor-pointer">
-                            Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="hover:bg-red-100 hover:text-red-600 p-2 cursor-pointer">
-                            Delete
-                        </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                </DropdownMenuContent>
+                    <DropdownMenuTrigger asChild>
+                        <button
+                            className="p-2 flex items-center justify-center rounded-md hover:bg-gray-100 cursor-pointer bg-white transition-all duration-300"
+                        >
+                            <HugeiconsIcon 
+                                icon={MoreVerticalSquare01Icon} 
+                                size={20}
+                                />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-white border border-gray-200 p-2 min-w-50">
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem className="hover:bg-gray-100 p-2 cursor-pointer">
+                                Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="hover:bg-red-100 hover:text-red-600 p-2 cursor-pointer">
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                    </DropdownMenuContent>
                 </DropdownMenu>
             </div>
 

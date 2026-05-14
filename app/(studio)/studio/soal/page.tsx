@@ -1,8 +1,6 @@
 import { AdminHeader } from "@/app/components/ui/Admin/AdminHeader";
 import { AdminQuestionCard } from "@/app/components/ui/Admin/AdminQuestionCard";
-import { ButtonAdmin } from "@/app/components/ui/Admin/ButtonAdmin";
-import { AddInvoiceIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { DialogAddQuestion } from "@/app/components/ui/Admin/DialogAddQuestion";
 
 export default function Soal() {
     return (
@@ -11,10 +9,7 @@ export default function Soal() {
 
             {/* add button */}
             <div className="flex justify-end">
-                <ButtonAdmin>
-                    <HugeiconsIcon icon={AddInvoiceIcon} size={20}/>
-                    Tambah Soal
-                </ButtonAdmin>
+                <DialogAddQuestion/>
             </div>
 
             {/* soal list */}

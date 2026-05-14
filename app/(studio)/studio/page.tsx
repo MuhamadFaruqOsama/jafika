@@ -1,7 +1,7 @@
-import { AdminHeader } from "../components/ui/Admin/AdminHeader";
-import { AdminTable } from "../components/ui/Admin/AdminTable";
-import { LastQuestionCardAdmin } from "../components/ui/Admin/LastQuestionCardAdmin";
-import { TotalQuestionCardAdmin } from "../components/ui/Admin/TotalQuestionCardAdmin";
+import { AdminHeader } from "../../components/ui/Admin/AdminHeader";
+import { AdminTable } from "../../components/ui/Admin/AdminTable";
+import { LastQuestionCardAdmin } from "../../components/ui/Admin/LastQuestionCardAdmin";
+import { TotalQuestionCardAdmin } from "../../components/ui/Admin/TotalQuestionCardAdmin";
 
 export default function Dashboard() {
     return (
