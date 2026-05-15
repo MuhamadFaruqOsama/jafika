@@ -4,6 +4,7 @@ import { ThemeInitializer } from "@/app/components/ui/ThemeInitializer";
 import { ProgressBarProvider } from "@/app/components/ui/ProgressBarProvider";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -33,6 +34,7 @@ export default function RootLayout({
           <ThemeInitializer />
           {children}
         </ProgressBarProvider>
+        <Toaster />
       </body>
     </html>
   );

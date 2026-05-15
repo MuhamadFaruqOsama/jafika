@@ -26,3 +26,20 @@ export function generateOtpCode() {
   const max = 10 ** OTP_DIGIT_LENGTH;
   return String(randomInt(min, max));
 }
+
+export async function hashOtpCode(otp: string) {
+  const salt = randomBytes(16).toString("hex");
+  const derivedKey = (await scryptAsync(otp, salt, 32)) as Buffer;
+  return `${salt}:${derivedKey.toString("hex")}`;
+}
+
+export async function verifyOtpCode(otp: string, storedHash: string) {
+  const [salt, hash] = storedHash.split(":");
+  if (!salt || !hash) return false;
+
+  const expectedBuffer = Buffer.from(hash, "hex");
+  const otpBuffer = (await scryptAsync(otp, salt, expectedBuffer.length)) as Buffer;
+
+  if (expectedBuffer.length !== otpBuffer.length) return false;
+  return timingSafeEqual(expectedBuffer, otpBuffer);
+}

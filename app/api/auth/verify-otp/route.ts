@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import {
+  buildClearPendingEmailCookie,
+  buildClearResendCooldownCookie,
+  getPendingEmailCookieName,
+} from "@/lib/auth/pending-email";
 import { createClient } from "@/lib/server";
 
 type VerifyOtpRequestBody = {
-  email?: string;
   otp?: string;
 };
 
@@ -13,73 +18,58 @@ function jsonError(message: string, status = 400) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as VerifyOtpRequestBody;
-    const email = body.email?.trim().toLowerCase() ?? "";
     const otp = body.otp?.trim() ?? "";
 
-    if (!email || !otp) {
-      return jsonError("Email dan OTP wajib diisi.");
+    if (!otp) {
+      return jsonError("OTP wajib diisi.");
     }
 
     if (!/^\d{6}$/.test(otp)) {
       return jsonError("OTP harus 6 digit angka.");
     }
 
+    const cookieStore = await cookies();
+    const pendingEmail = cookieStore.get(getPendingEmailCookieName())?.value;
+    if (!pendingEmail) {
+      return jsonError("Sesi verifikasi tidak ditemukan. Silakan daftar ulang.", 401);
+    }
+
     const supabase = await createClient();
+    const otpTypes = ["email", "signup"] as const;
+    let lastErrorMessage = "OTP tidak valid atau sudah kedaluwarsa.";
+    let isVerified = false;
 
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id, email_verified_at")
-      .eq("email", email)
-      .maybeSingle();
+    for (const type of otpTypes) {
+      const { error } = await supabase.auth.verifyOtp({
+        email: pendingEmail,
+        token: otp,
+        type,
+      });
 
-    if (userError) {
-      return jsonError(userError.message, 500);
+      if (!error) {
+        isVerified = true;
+        break;
+      }
+
+      lastErrorMessage = error.message;
     }
 
-    if (!user) {
-      return jsonError("Akun tidak ditemukan.", 404);
+    if (!isVerified) {
+      return jsonError(lastErrorMessage, 400);
     }
 
-    if (user.email_verified_at) {
-      return NextResponse.json({ message: "Email sudah terverifikasi." });
-    }
-
-    const nowIso = new Date().toISOString();
-    const { data: otpRow, error: otpError } = await supabase
-      .from("user_otps")
-      .select("id, expired_at")
-      .eq("user_id", user.id)
-      .eq("otp", otp)
-      .gte("expired_at", nowIso)
-      .order("created_at", { ascending: false })
-      .maybeSingle();
-
-    if (otpError) {
-      return jsonError(otpError.message, 500);
-    }
-
-    if (!otpRow) {
-      return jsonError("OTP tidak valid atau sudah kadaluarsa.", 400);
-    }
-
-    const verifiedAt = new Date().toISOString();
-
-    const { error: verifyError } = await supabase
-      .from("users")
-      .update({ email_verified_at: verifiedAt })
-      .eq("id", user.id);
-
-    if (verifyError) {
-      return jsonError(verifyError.message, 500);
-    }
-
-    await supabase.from("user_otps").delete().eq("id", otpRow.id);
-
-    return NextResponse.json({
-      message: "OTP valid. Email berhasil diverifikasi.",
-      emailVerifiedAt: verifiedAt,
-    });
-  } catch {
-    return jsonError("Terjadi kesalahan pada server.", 500);
+    const response = NextResponse.json({ message: "OTP valid. Email berhasil diverifikasi." });
+    const clearPendingEmail = buildClearPendingEmailCookie();
+    const clearCooldown = buildClearResendCooldownCookie();
+    response.cookies.set(
+      clearPendingEmail.name,
+      clearPendingEmail.value,
+      clearPendingEmail.options,
+    );
+    response.cookies.set(clearCooldown.name, clearCooldown.value, clearCooldown.options);
+    return response;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Terjadi kesalahan pada server.";
+    return jsonError(message, 500);
   }
 }

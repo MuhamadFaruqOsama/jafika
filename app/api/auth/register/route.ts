@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/server";
-import { generateOtpCode, hashPassword } from "@/lib/auth/credentials";
-import { buildOtpExpiredAtIso } from "@/lib/auth/otp";
-import { sendOtpEmail } from "@/lib/auth/otp-email";
 
 type RegisterRequestBody = {
   username?: string;
@@ -44,78 +41,28 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClient();
-
-    const { data: existingUser, error: existingUserError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (existingUserError) {
-      return jsonError(existingUserError.message, 500);
-    }
-
-    if (existingUser) {
-      return jsonError("Email sudah terdaftar.", 409);
-    }
-
-    const passwordHash = await hashPassword(password);
-
-    const { data: createdUser, error: createUserError } = await supabase
-      .from("users")
-      .insert({
-        username,
-        email,
-        email_verified_at: null,
-        password: passwordHash,
-      })
-      .select("id, email")
-      .single();
-
-    if (createUserError || !createdUser) {
-      return jsonError(createUserError?.message ?? "Gagal membuat akun.", 500);
-    }
-
-    const otp = generateOtpCode();
-    const expiredAt = buildOtpExpiredAtIso();
-
-    const { error: otpError } = await supabase.from("user_otps").insert({
-      user_id: createdUser.id,
-      otp,
-      expired_at: expiredAt,
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username },
+      },
     });
 
-    if (otpError) {
-      await supabase.from("users").delete().eq("id", createdUser.id);
-      return jsonError(otpError.message, 500);
+    if (error) {
+      const isAlreadyRegistered = /already registered/i.test(error.message);
+      return jsonError(
+        isAlreadyRegistered ? "Email sudah terdaftar." : error.message,
+        isAlreadyRegistered ? 409 : 400,
+      );
     }
 
-    try {
-      await sendOtpEmail({
-        to: createdUser.email,
-        name: username,
-        otp,
-        expiredAtIso: expiredAt,
-      });
-    } catch (error) {
-      await supabase.from("user_otps").delete().eq("user_id", createdUser.id);
-      await supabase.from("users").delete().eq("id", createdUser.id);
-      const message = error instanceof Error ? error.message : "Gagal mengirim email OTP.";
-      return jsonError(message, 500);
-    }
-
-    const payload: Record<string, string> = {
-      message: "Registrasi berhasil. Lanjut konfirmasi OTP.",
-      email: createdUser.email,
-      expiredAt,
-    };
-
-    if (process.env.NODE_ENV !== "production") {
-      payload.debugOtp = otp;
-    }
-
-    return NextResponse.json(payload, { status: 201 });
-  } catch {
-    return jsonError("Terjadi kesalahan pada server.", 500);
+    return NextResponse.json(
+      { message: "Registrasi berhasil." },
+      { status: 201 },
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Terjadi kesalahan pada server.";
+    return jsonError(message, 500);
   }
 }

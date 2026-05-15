@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import {
+  buildResendCooldownCookie,
+  getPendingEmailCookieName,
+  getResendCooldownCookieName,
+} from "@/lib/auth/pending-email";
 import { createClient } from "@/lib/server";
-import { generateOtpCode } from "@/lib/auth/credentials";
-import { buildOtpExpiredAtIso, getRemainingCooldownSeconds } from "@/lib/auth/otp";
-import { sendOtpEmail } from "@/lib/auth/otp-email";
-
-type ResendOtpRequestBody = {
-  email?: string;
-};
 
 function jsonError(message: string, status = 400, retryAfterSeconds?: number) {
   const payload: Record<string, string | number> = { error: message };
@@ -16,49 +15,18 @@ function jsonError(message: string, status = 400, retryAfterSeconds?: number) {
   return NextResponse.json(payload, { status });
 }
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    const body = (await request.json()) as ResendOtpRequestBody;
-    const email = body.email?.trim().toLowerCase() ?? "";
-
-    if (!email) {
-      return jsonError("Email wajib diisi.");
+    const cookieStore = await cookies();
+    const pendingEmail = cookieStore.get(getPendingEmailCookieName())?.value;
+    if (!pendingEmail) {
+      return jsonError("Sesi verifikasi tidak ditemukan. Silakan daftar ulang.", 401);
     }
 
-    const supabase = await createClient();
-
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id, username, email, email_verified_at")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (userError) {
-      return jsonError(userError.message, 500);
-    }
-
-    if (!user) {
-      return jsonError("Akun tidak ditemukan.", 404);
-    }
-
-    if (user.email_verified_at) {
-      return jsonError("Email sudah terverifikasi.", 400);
-    }
-
-    const { data: latestOtp, error: latestOtpError } = await supabase
-      .from("user_otps")
-      .select("created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (latestOtpError) {
-      return jsonError(latestOtpError.message, 500);
-    }
-
-    if (latestOtp?.created_at) {
-      const remainingSeconds = getRemainingCooldownSeconds(latestOtp.created_at);
+    const cooldownUntilRaw = cookieStore.get(getResendCooldownCookieName())?.value;
+    const cooldownUntil = Number(cooldownUntilRaw ?? 0);
+    if (cooldownUntil > Date.now()) {
+      const remainingSeconds = Math.ceil((cooldownUntil - Date.now()) / 1000);
       if (remainingSeconds > 0) {
         return jsonError(
           "Permintaan OTP terlalu sering. Coba lagi sebentar.",
@@ -68,45 +36,24 @@ export async function POST(request: Request) {
       }
     }
 
-    const otp = generateOtpCode();
-    const expiredAt = buildOtpExpiredAtIso();
-
-    await supabase.from("user_otps").delete().eq("user_id", user.id);
-
-    const { error: insertOtpError } = await supabase.from("user_otps").insert({
-      user_id: user.id,
-      otp,
-      expired_at: expiredAt,
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: pendingEmail,
     });
 
-    if (insertOtpError) {
-      return jsonError(insertOtpError.message, 500);
+    if (error) {
+      return jsonError(error.message, 400);
     }
 
-    try {
-      await sendOtpEmail({
-        to: user.email,
-        name: user.username,
-        otp,
-        expiredAtIso: expiredAt,
-      });
-    } catch (error) {
-      await supabase.from("user_otps").delete().eq("user_id", user.id);
-      const message = error instanceof Error ? error.message : "Gagal mengirim email OTP.";
-      return jsonError(message, 500);
-    }
-
-    const payload: Record<string, string> = {
+    const response = NextResponse.json({
       message: "OTP baru berhasil dikirim.",
-      expiredAt,
-    };
-
-    if (process.env.NODE_ENV !== "production") {
-      payload.debugOtp = otp;
-    }
-
-    return NextResponse.json(payload);
-  } catch {
-    return jsonError("Terjadi kesalahan pada server.", 500);
+    });
+    const cooldownCookie = buildResendCooldownCookie();
+    response.cookies.set(cooldownCookie.name, cooldownCookie.value, cooldownCookie.options);
+    return response;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Terjadi kesalahan pada server.";
+    return jsonError(message, 500);
   }
 }
