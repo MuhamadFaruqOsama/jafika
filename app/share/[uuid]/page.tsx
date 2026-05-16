@@ -13,6 +13,8 @@ type SharedQuestion = {
   title: string
   description: string
   public_access: boolean
+  kpk_mode: boolean
+  fpb_mode: boolean
 }
 
 export default async function SharePage({ params }: SharePageProps) {
@@ -26,7 +28,7 @@ export default async function SharePage({ params }: SharePageProps) {
   const supabase = await createClient()
   const { data: question } = await supabase
     .from("question")
-    .select("uuid, title, description, public_access")
+    .select("uuid, title, description, public_access, kpk_mode, fpb_mode")
     .eq("uuid", normalizedUuid)
     .maybeSingle<SharedQuestion>()
 
@@ -35,11 +37,13 @@ export default async function SharePage({ params }: SharePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
       <ShareQuestionStartCard
         uuid={question.uuid}
         title={question.title}
         description={question.description}
+        kpk_mode={question.kpk_mode}
+        fpb_mode={question.fpb_mode}
       />
     </div>
   )
