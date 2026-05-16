@@ -137,6 +137,15 @@ export function DialogAddQuestion() {
                       onValuesChange={setFindNumber}
                     />
                     <InputAdmin
+                        key={`material-${clearFileSignal}`}
+                        label="Materi (pdf)"
+                        id="material"
+                        type="file"
+                        placeholder="Masukkan materi soal"
+                        description="Materi akan muncul ketika soal dibuka."
+                        onFileChange={setThumbnailFile}
+                    />
+                    <InputAdmin
                         key={`thumbnail-${clearFileSignal}`}
                         label="Thumbnail (16:9)"
                         id="thumbnail"

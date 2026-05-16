@@ -7,6 +7,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/server";
+import { MaterialDownload } from "@/app/components/ui/MaterialDownload";
 
 type DetailPageProps = {
   searchParams: Promise<{
@@ -106,20 +107,23 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
                     <div className="bg-pink-400 text-white rounded-full py-1 px-5 w-fit font-medium text-sm mb-5">Detail Soal</div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* thumbnail */}
-                      <div className="relative mb-4 aspect-video w-full overflow-hidden rounded-md border border-gray-200 bg-gray-100">
-                        {question.thumbnail ? (
-                          <Image
-                            src={question.thumbnail}
-                            alt={question.title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 1024px) 100vw, 70vw"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-sm text-gray-500">
-                            Belum ada thumbnail
-                          </div>
-                        )}
+                      <div className="space-y-3">
+                        <div className="relative mb-4 aspect-video w-full overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+                          {question.thumbnail ? (
+                            <Image
+                              src={question.thumbnail}
+                              alt={question.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 1024px) 100vw, 70vw"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                              Belum ada thumbnail
+                            </div>
+                          )}
+                        </div>
+                        <MaterialDownload/>
                       </div>
 
                       {/* title */}

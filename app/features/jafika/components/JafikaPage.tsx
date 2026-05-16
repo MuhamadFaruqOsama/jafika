@@ -17,6 +17,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MaterialDownload } from "@/app/components/ui/MaterialDownload";
 
 export type JafikaShareConfig = {
   enabled: true;
@@ -404,20 +405,23 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
               </div>
               <div className="rounded-4xl border border-gray-200 bg-white p-4 shadow-sm mb-5">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-                    {shareConfig.thumbnail ? (
-                      <Image
-                        src={shareConfig.thumbnail}
-                        alt={shareConfig.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-gray-500">
-                        Belum ada thumbnail
-                      </div>
-                    )}
+                  <div className="space-y-3">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                      {shareConfig.thumbnail ? (
+                        <Image
+                          src={shareConfig.thumbnail}
+                          alt={shareConfig.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                          Belum ada thumbnail
+                        </div>
+                      )}
+                    </div>
+                    <MaterialDownload/>
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
