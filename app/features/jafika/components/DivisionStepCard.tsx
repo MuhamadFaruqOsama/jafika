@@ -1,6 +1,7 @@
 import type { DivisionStep } from "@/app/features/jafika/types/fpb";
 import { CheckmarkCircle03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Image from "next/image";
 
 type DivisionStepCardProps = {
   step: DivisionStep;
@@ -11,7 +12,14 @@ type DivisionStepCardProps = {
 
 function renderObjectCopies(count: number, imageUrl: string) {
   return Array.from({ length: Math.max(0, count) }).map((_, index) => (
-    <img key={index} src={imageUrl} className="w-10" alt="Objek pembagian" />
+    <Image
+      key={index}
+      src={imageUrl}
+      alt="Objek pembagian"
+      width={40}
+      height={40}
+      className="h-auto w-10"
+    />
   ));
 }
 

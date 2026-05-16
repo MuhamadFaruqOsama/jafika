@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-
 import {
   Field,
   FieldDescription,
@@ -11,18 +9,32 @@ import { Input } from "@/components/ui/input"
 import { Add01Icon, Remove01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-export function InputCorrectNumber() {
-  const [totalFields, setTotalFields] = useState(2)
+type InputCorrectNumberProps = {
+  values: number[]
+  onValuesChange: (values: number[]) => void
+}
+
+export function InputCorrectNumber({ values, onValuesChange }: InputCorrectNumberProps) {
+  const totalFields = Math.max(2, values.length)
 
   const handleAddField = () => {
-    setTotalFields((prev) => prev + 1)
+    onValuesChange([...values, 0])
   }
 
   const handleRemoveField = () => {
     if (totalFields > 2) {
-      setTotalFields((prev) => prev - 1)
+      onValuesChange(values.slice(0, -1))
     }
   }
+
+  const handleNumberChange = (index: number, value: string) => {
+    const parsed = Number(value)
+    const nextValues = [...values]
+    nextValues[index] = Number.isFinite(parsed) ? parsed : 0
+    onValuesChange(nextValues)
+  }
+
+  const normalizedValues = Array.from({ length: totalFields }, (_, index) => values[index] ?? 0)
 
   return (
     <Field>
@@ -60,11 +72,14 @@ export function InputCorrectNumber() {
       </FieldLabel>
 
       <div className="grid grid-cols-2 gap-4 border border-gray-200 p-2 rounded-md">
-        {Array.from({ length: totalFields }).map((_, index) => (
+        {normalizedValues.map((numberValue, index) => (
           <div key={index} className="flex gap-3 items-center">
             <div>{index + 1}.</div>
 
             <Input
+              type="number"
+              value={numberValue}
+              onChange={(event) => handleNumberChange(index, event.target.value)}
               placeholder={`Masukkan bilangan ke-${index + 1}`}
             />
           </div>

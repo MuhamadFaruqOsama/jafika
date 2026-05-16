@@ -10,6 +10,7 @@ type QRGeneratorProps = {
 export function QRGenerator({link}: QRGeneratorProps) {
     const ref = useRef<ReactQRCodeRef>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [isCopying, setIsCopying] = useState(false)
 
     const handleDownload = () => {
         setIsLoading(true)
@@ -19,6 +20,15 @@ export function QRGenerator({link}: QRGeneratorProps) {
             size: 1000,
         })
         setIsLoading(false)
+    }
+
+    const handleCopyLink = async () => {
+        setIsCopying(true)
+        try {
+            await navigator.clipboard.writeText(link)
+        } finally {
+            setIsCopying(false)
+        }
     }
     
     return (
@@ -35,9 +45,9 @@ export function QRGenerator({link}: QRGeneratorProps) {
             </button>
             <button 
                 className="py-2 mt-2 w-full m-auto bg-pink-400 text-white text-sm rounded-sm cursor-pointer"
-                onClick={handleDownload}
+                onClick={handleCopyLink}
             >
-                Copy Link
+                {isCopying ? 'Copying...' : 'Copy Link'}
             </button>
         </div>
     )

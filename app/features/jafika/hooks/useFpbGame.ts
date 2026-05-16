@@ -30,6 +30,25 @@ export function buildSelectionKey(
 }
 
 export function useFpbGame() {
+  const getInitialThemeMode = (): ThemeMode => {
+    if (typeof window === "undefined") return "light";
+    return window.localStorage.getItem(THEME_STORAGE_KEY) === "dark"
+      ? "dark"
+      : "light";
+  };
+
+  const getInitialBacksoundEnabled = () => {
+    if (typeof window === "undefined") return true;
+    const saved = window.localStorage.getItem(BACKSOUND_STORAGE_KEY);
+    return saved === null ? true : saved === "true";
+  };
+
+  const getInitialSoundEffectEnabled = () => {
+    if (typeof window === "undefined") return true;
+    const saved = window.localStorage.getItem(SOUND_EFFECT_STORAGE_KEY);
+    return saved === null ? true : saved === "true";
+  };
+
   const [numberInputs, setNumberInputs] = useState<string[]>(createDefaultInputs);
   const [isNumbersLocked, setIsNumbersLocked] = useState(false);
   const [hasStartedDistribution, setHasStartedDistribution] = useState(false);
@@ -47,9 +66,9 @@ export function useFpbGame() {
   >({});
   const [showExplanation, setShowExplanation] = useState(false);
   const [showKpkExplanation, setShowKpkExplanation] = useState(false);
-  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
-  const [isBacksoundEnabled, setIsBacksoundEnabled] = useState(true);
-  const [isSoundEffectEnabled, setIsSoundEffectEnabled] = useState(true);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(getInitialThemeMode);
+  const [isBacksoundEnabled, setIsBacksoundEnabled] = useState(getInitialBacksoundEnabled);
+  const [isSoundEffectEnabled, setIsSoundEffectEnabled] = useState(getInitialSoundEffectEnabled);
   const [distributionTick, setDistributionTick] = useState(0);
   const [correctTick, setCorrectTick] = useState(0);
   const [invalidTick, setInvalidTick] = useState(0);
@@ -57,20 +76,17 @@ export function useFpbGame() {
   const [objectModalOpen, setObjectModalOpen] = useState(false);
 
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    const resolvedTheme: ThemeMode = savedTheme === "dark" ? "dark" : "light";
-    applyTheme(resolvedTheme);
+    document.documentElement.classList.toggle("dark", themeMode === "dark");
+    window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+  }, [themeMode]);
 
-    const savedBacksound = window.localStorage.getItem(BACKSOUND_STORAGE_KEY);
-    if (savedBacksound !== null) {
-      setIsBacksoundEnabled(savedBacksound === "true");
-    }
+  useEffect(() => {
+    window.localStorage.setItem(BACKSOUND_STORAGE_KEY, String(isBacksoundEnabled));
+  }, [isBacksoundEnabled]);
 
-    const savedSoundEffect = window.localStorage.getItem(SOUND_EFFECT_STORAGE_KEY);
-    if (savedSoundEffect !== null) {
-      setIsSoundEffectEnabled(savedSoundEffect === "true");
-    }
-  }, []);
+  useEffect(() => {
+    window.localStorage.setItem(SOUND_EFFECT_STORAGE_KEY, String(isSoundEffectEnabled));
+  }, [isSoundEffectEnabled]);
 
   const selectedImageUrl = useMemo(() => {
     return (
@@ -111,24 +127,16 @@ export function useFpbGame() {
     toast.success(message);
   }
 
-  function applyTheme(mode: ThemeMode) {
-    setThemeMode(mode);
-    document.documentElement.classList.toggle("dark", mode === "dark");
-    window.localStorage.setItem(THEME_STORAGE_KEY, mode);
-  }
-
   function toggleDarkMode(isEnabled: boolean) {
-    applyTheme(isEnabled ? "dark" : "light");
+    setThemeMode(isEnabled ? "dark" : "light");
   }
 
   function toggleBacksound(isEnabled: boolean) {
     setIsBacksoundEnabled(isEnabled);
-    window.localStorage.setItem(BACKSOUND_STORAGE_KEY, String(isEnabled));
   }
 
   function toggleSoundEffect(isEnabled: boolean) {
     setIsSoundEffectEnabled(isEnabled);
-    window.localStorage.setItem(SOUND_EFFECT_STORAGE_KEY, String(isEnabled));
   }
 
   function parseNumberInputs(): number[] | null {

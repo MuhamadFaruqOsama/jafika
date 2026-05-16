@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -15,10 +18,82 @@ import { TextAreaAdmin } from "./TextAreaAdmin"
 import { QuestionTypeAdmin } from "./QuestionTypeAdmin"
 import { InputCorrectNumber } from "./InputCorrectNumber"
 import { AdditionalSettingsAdmin } from "./AdditionalSettingsAdmin"
+import { toast } from "sonner"
+
+type CreateQuestionResponse = {
+  error?: string
+  message?: string
+}
 
 export function DialogAddQuestion() {
+    const [open, setOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [title, setTitle] = useState("")
+    const [description, setDescription] = useState("")
+    const [kpkMode, setKpkMode] = useState(true)
+    const [fpbMode, setFpbMode] = useState(true)
+    const [findNumber, setFindNumber] = useState<number[]>([0, 0])
+    const [publicAccess, setPublicAccess] = useState(true)
+    const [assistant3d, setAssistant3d] = useState(true)
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+    const [clearFileSignal, setClearFileSignal] = useState(0)
+
+    const resetForm = () => {
+      setTitle("")
+      setDescription("")
+      setKpkMode(true)
+      setFpbMode(true)
+      setFindNumber([0, 0])
+      setPublicAccess(true)
+      setAssistant3d(true)
+      setThumbnailFile(null)
+      setClearFileSignal((prev) => prev + 1)
+    }
+
+    const handleSubmit = async () => {
+      if (!kpkMode && !fpbMode) {
+        toast.error("Pilih minimal satu mode soal (KPK atau FPB).")
+        return
+      }
+
+      setIsSubmitting(true)
+      try {
+        const formData = new FormData()
+        formData.append("title", title)
+        formData.append("description", description)
+        formData.append("kpkMode", String(kpkMode))
+        formData.append("fpbMode", String(fpbMode))
+        formData.append("findNumber", JSON.stringify(findNumber))
+        formData.append("publicAccess", String(publicAccess))
+        formData.append("assistant3d", String(assistant3d))
+
+        if (thumbnailFile) {
+          formData.append("thumbnail", thumbnailFile)
+        }
+
+        const response = await fetch("/api/question", {
+          method: "POST",
+          body: formData,
+        })
+
+        const payload = (await response.json()) as CreateQuestionResponse
+        if (!response.ok) {
+          toast.error(payload.error ?? "Gagal membuat soal.")
+          return
+        }
+
+        toast.success(payload.message ?? "Soal berhasil dibuat.")
+        resetForm()
+        setOpen(false)
+      } catch {
+        toast.error("Terjadi kendala jaringan. Coba lagi.")
+      } finally {
+        setIsSubmitting(false)
+      }
+    }
+
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>
                 <ButtonAdmin>
                     <HugeiconsIcon icon={AddInvoiceIcon} size={20}/>
@@ -40,30 +115,53 @@ export function DialogAddQuestion() {
                         type="text"
                         placeholder="Masukkan judul soal"
                         description="Judul akan digunakan sebagai thumbnail soal."
+                        value={title}
+                        onValueChange={setTitle}
                     />
-                    <QuestionTypeAdmin/>
+                    <QuestionTypeAdmin
+                      kpkMode={kpkMode}
+                      fpbMode={fpbMode}
+                      onKpkModeChange={setKpkMode}
+                      onFpbModeChange={setFpbMode}
+                    />
                     <TextAreaAdmin
                         label="Deskripsi"
                         id="description"
                         placeholder="Masukkan deskripsi soal"
                         description="Masukkan soal deskripsi yang harus dipecahkan."
+                        value={description}
+                        onValueChange={setDescription}
                     />
-                    <InputCorrectNumber/>
+                    <InputCorrectNumber
+                      values={findNumber}
+                      onValuesChange={setFindNumber}
+                    />
                     <InputAdmin
-                        label="Thumbnail (9:16)"
+                        key={`thumbnail-${clearFileSignal}`}
+                        label="Thumbnail (16:9)"
                         id="thumbnail"
                         type="file"
                         placeholder="Masukkan thumbnail soal"
                         description="Thumbnail akan muncul ketika soal dibuka."
+                        onFileChange={setThumbnailFile}
                     />
-                    <AdditionalSettingsAdmin/>
+                    <AdditionalSettingsAdmin
+                      publicAccess={publicAccess}
+                      assistant3d={assistant3d}
+                      onPublicAccessChange={setPublicAccess}
+                      onAssistant3dChange={setAssistant3d}
+                    />
                 </div>
                 {/* form for adding question */}
                 <DialogFooter className="bg-white">
                     <div className="flex justify-end">
-                        <ButtonAdmin>
+                        <ButtonAdmin
+                          // type="button"
+                          disabled={isSubmitting}
+                          onClick={handleSubmit}
+                        >
                             <HugeiconsIcon icon={AddInvoiceIcon} size={20}/>
-                            Tambahkan Soal
+                            {isSubmitting ? "Menyimpan..." : "Tambahkan Soal"}
                         </ButtonAdmin>
                     </div>
                 </DialogFooter>

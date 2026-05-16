@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { buildSelectionKey } from "@/app/features/jafika/hooks/useFpbGame";
 import type { FactorPower } from "@/app/features/jafika/types/fpb";
 import {
@@ -8,7 +8,7 @@ import {
 } from "@/app/features/jafika/lib/explanationTemplates";
 import FPBImage from "@/public/img/fpb.png";
 import KPKImage from "@/public/img/kpk.png";
-import { Cancel01Icon, CheckmarkCircle03Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 
@@ -41,13 +41,21 @@ export function FactorSelectionCard({
   explanationFaktorList = [],
   explanationLabel = "FPB",
 }: FactorSelectionCardProps) {
-  const [templateIndex, setTemplateIndex] = useState(0);
+  const buildDeterministicIndex = (seed: string, total: number) => {
+    if (total <= 0) return 0;
+    let hash = 0;
+    for (let index = 0; index < seed.length; index += 1) {
+      hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+    }
+    return hash % total;
+  };
 
-  useEffect(() => {
-    if (!explanationVisible) return;
+  const templateIndex = useMemo(() => {
+    if (!explanationVisible) return 0;
     const totalTemplates = getExplanationTemplateCount(explanationLabel);
-    setTemplateIndex(Math.floor(Math.random() * totalTemplates));
-  }, [explanationVisible, explanationLabel]);
+    const seed = `${explanationLabel}-${explanationNumbers.join("-")}-${explanationResultValue}`;
+    return buildDeterministicIndex(seed, totalTemplates);
+  }, [explanationVisible, explanationLabel, explanationNumbers, explanationResultValue]);
 
   const cardImage = variant === "KPK" ? KPKImage : FPBImage;
   const explanationText = useMemo(() => {
@@ -106,8 +114,8 @@ export function FactorSelectionCard({
                   );
 
                   return (
-                    <div className="flex items-center gap-3">
-                      <li key={key}>
+                    <div key={key} className="flex items-center gap-3">
+                      <li>
                         <label
                           className={`flex cursor-pointer relative flex-col items-center justify-center border-2 bg-white rounded-full w-14 h-14 font-extrabold transition-all dark:bg-black ${
                             selectedFactors[key]

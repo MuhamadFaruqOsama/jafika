@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-
 import {
   Field,
   FieldContent,
@@ -12,18 +10,19 @@ import {
 } from "@/components/ui/field"
 import { Switch } from "@/components/ui/switch"
 
-export function AdditionalSettingsAdmin() {
-  const [totalFields, setTotalFields] = useState(2)
+type AdditionalSettingsAdminProps = {
+  publicAccess: boolean
+  assistant3d: boolean
+  onPublicAccessChange: (checked: boolean) => void
+  onAssistant3dChange: (checked: boolean) => void
+}
 
-  const handleAddField = () => {
-    setTotalFields((prev) => prev + 1)
-  }
-
-  const handleRemoveField = () => {
-    if (totalFields > 2) {
-      setTotalFields((prev) => prev - 1)
-    }
-  }
+export function AdditionalSettingsAdmin({
+  publicAccess,
+  assistant3d,
+  onPublicAccessChange,
+  onAssistant3dChange,
+}: AdditionalSettingsAdminProps) {
 
   return (
     <Field>
@@ -46,7 +45,11 @@ export function AdditionalSettingsAdmin() {
                     Semua orang yang memiliki link bisa mengakses soal Anda.
                     </FieldDescription>
                 </FieldContent>
-                <Switch id="public-access" defaultChecked/>
+                <Switch
+                  id="public-access"
+                  checked={publicAccess}
+                  onCheckedChange={onPublicAccessChange}
+                />
             </Field>
         </FieldLabel>
         </FieldGroup>
@@ -59,7 +62,11 @@ export function AdditionalSettingsAdmin() {
                     Munculkan 3D Assistant untuk membantu memecahkan masalah.
                     </FieldDescription>
                 </FieldContent>
-                <Switch id="3d-assistant" defaultChecked/>
+                <Switch
+                  id="3d-assistant"
+                  checked={assistant3d}
+                  onCheckedChange={onAssistant3dChange}
+                />
             </Field>
         </FieldLabel>
         </FieldGroup>

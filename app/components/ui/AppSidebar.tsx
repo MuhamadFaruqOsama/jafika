@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { LinkAppSidebar } from "./LinkAppSidebar"
-import { BookBookmark02Icon, Clock02Icon, Home07Icon, Logout02Icon } from "@hugeicons/core-free-icons"
+import { BookBookmark02Icon, Home07Icon, Logout02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
 type SidebarLink = {

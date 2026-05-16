@@ -13,14 +13,11 @@ import { SettingsDrawer } from "@/app/features/jafika/components/SettingsDrawer"
 import { NumberPreviewBar } from "@/app/features/jafika/components/NumberPreviewBar";
 import { Toaster } from "@/components/ui/sonner";
 import Button from "@/app/components/ui/Button";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { MinusSignCircleIcon, PlusSignCircleIcon } from "@hugeicons/core-free-icons";
 import Image from "next/image";
 
 export function JafikaPage() {
   const [loading, setLoading] = useState(true);
   const [showStartOverlay, setShowStartOverlay] = useState(false);
-  const [showFinishOverlay, setShowFinishOverlay] = useState(false);
   const game = useFpbGame();
   const backsoundRef = useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -35,8 +32,7 @@ export function JafikaPage() {
   const lastInvalidTickRef = useRef(0);
   const lastInvalidAtRef = useRef(0);
   const pendingClickTimeoutRef = useRef<number | null>(null);
-  const finishOverlayTimeoutRef = useRef<number | null>(null);
-  const hasShownFinishOverlayRef = useRef(false);
+  const hasPlayedFinishVoiceRef = useRef(false);
   const labelNumbers = game.numberInputs.map((value, index) => {
     const parsed = Number.parseInt(value, 10);
     return Number.isInteger(parsed) ? parsed : index + 1;
@@ -55,18 +51,12 @@ export function JafikaPage() {
 
   useEffect(() => {
     if (!game.isFinished) {
-      hasShownFinishOverlayRef.current = false;
-      if (finishOverlayTimeoutRef.current !== null) {
-        window.clearTimeout(finishOverlayTimeoutRef.current);
-        finishOverlayTimeoutRef.current = null;
-      }
-      setShowFinishOverlay(false);
+      hasPlayedFinishVoiceRef.current = false;
       return;
     }
 
-    if (hasShownFinishOverlayRef.current) return;
-    hasShownFinishOverlayRef.current = true;
-    setShowFinishOverlay(true);
+    if (hasPlayedFinishVoiceRef.current) return;
+    hasPlayedFinishVoiceRef.current = true;
 
     if (game.isSoundEffectEnabled) {
       const voiceAudio = finishVoiceRef.current;
@@ -77,18 +67,7 @@ export function JafikaPage() {
         });
       }
     }
-
-    finishOverlayTimeoutRef.current = window.setTimeout(() => {
-      setShowFinishOverlay(false);
-      finishOverlayTimeoutRef.current = null;
-    }, 3500);
-    return () => {
-      if (finishOverlayTimeoutRef.current !== null) {
-        window.clearTimeout(finishOverlayTimeoutRef.current);
-        finishOverlayTimeoutRef.current = null;
-      }
-    };
-  }, [game.isFinished]);
+  }, [game.isFinished, game.isSoundEffectEnabled]);
 
   useEffect(() => {
     const audio = backsoundRef.current;
@@ -262,7 +241,7 @@ export function JafikaPage() {
         </div>
       )}
 
-      {showFinishOverlay && (
+      {game.isFinished && (
         <div className="fixed inset-0 z-9999999 flex items-center justify-center bg-black/50">
           <Image
             src="/img/tentuin-jawaban.png"
@@ -415,8 +394,6 @@ export function JafikaPage() {
         onToggleSoundEffect={game.toggleSoundEffect}
         backsoundEnabled={game.isBacksoundEnabled}
         onToggleBacksound={game.toggleBacksound}
-        darkMode={game.themeMode === "dark"}
-        onToggleDarkMode={game.toggleDarkMode}
       />
 
       <ObjectPickerModal

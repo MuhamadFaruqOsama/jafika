@@ -20,12 +20,13 @@ create table if not exists public.question (
   uuid varchar(255) not null unique,
   user_id bigint not null references public.users(id) on delete cascade,
   title varchar(255) not null,
-  type varchar(100) not null,
+  kpk_mode boolean not null default true,
+  fpb_mode boolean not null default true,
   description text not null,
   find_number jsonb not null default '[]'::jsonb,
   thumbnail varchar(255) null,
-  public_access boolean not null default false,
-  "3d_assistant" boolean not null default false,
+  public_access boolean not null default true,
+  "3d_assistant" boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

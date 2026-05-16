@@ -17,9 +17,21 @@ type InputAdminProps = {
   type: string
   placeholder: string
   description: string
+  value?: string
+  onValueChange?: (value: string) => void
+  onFileChange?: (file: File | null) => void
 }
 
-export function InputAdmin({ label, id, type, placeholder, description }: InputAdminProps) {
+export function InputAdmin({
+  label,
+  id,
+  type,
+  placeholder,
+  description,
+  value,
+  onValueChange,
+  onFileChange,
+}: InputAdminProps) {
   const [previewSrc, setPreviewSrc] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -36,21 +48,25 @@ export function InputAdmin({ label, id, type, placeholder, description }: InputA
 
     if (!selectedFile) {
       setPreviewSrc(null)
+      onFileChange?.(null)
       return
     }
 
     if (!selectedFile.type.startsWith("image/")) {
       event.target.value = ""
       setPreviewSrc(null)
+      onFileChange?.(null)
       return
     }
 
     const filePreview = URL.createObjectURL(selectedFile)
     setPreviewSrc(filePreview)
+    onFileChange?.(selectedFile)
   }
 
   const handleClearFile = () => {
     setPreviewSrc(null)
+    onFileChange?.(null)
 
     if (inputRef.current) {
       inputRef.current.value = ""
@@ -65,8 +81,13 @@ export function InputAdmin({ label, id, type, placeholder, description }: InputA
         id={id}
         type={type}
         placeholder={placeholder}
+        value={type === "file" ? undefined : value}
+        onChange={
+          type === "file"
+            ? handleFileChange
+            : (event) => onValueChange?.(event.target.value)
+        }
         accept={type === "file" ? "image/*" : undefined}
-        onChange={type === "file" ? handleFileChange : undefined}
       />
       {type === "file" && previewSrc && (
         <div className="mt-3 relative">

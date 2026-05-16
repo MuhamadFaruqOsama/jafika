@@ -7,7 +7,19 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 
-export function QuestionTypeAdmin() {
+type QuestionTypeAdminProps = {
+  kpkMode: boolean
+  fpbMode: boolean
+  onKpkModeChange: (checked: boolean) => void
+  onFpbModeChange: (checked: boolean) => void
+}
+
+export function QuestionTypeAdmin({
+  kpkMode,
+  fpbMode,
+  onKpkModeChange,
+  onFpbModeChange,
+}: QuestionTypeAdminProps) {
   return (
     <Field>
         <FieldLabel htmlFor="question-type" className="text-base">
@@ -17,12 +29,13 @@ export function QuestionTypeAdmin() {
             <FieldGroup>
               <Field orientation="horizontal">
                 <Checkbox
-                  id="terms-checkbox-desc"
-                  name="terms-checkbox-desc"
-                  defaultChecked
+                  id="kpk-mode-checkbox"
+                  name="kpk-mode-checkbox"
+                  checked={kpkMode}
+                  onCheckedChange={(checked) => onKpkModeChange(checked === true)}
                 />
                 <FieldContent>
-                  <FieldLabel htmlFor="terms-checkbox-desc">
+                  <FieldLabel htmlFor="kpk-mode-checkbox">
                     KPK
                   </FieldLabel>
                   <FieldDescription>
@@ -34,12 +47,13 @@ export function QuestionTypeAdmin() {
             <FieldGroup>
               <Field orientation="horizontal">
                 <Checkbox
-                  id="terms-checkbox-desc"
-                  name="terms-checkbox-desc"
-                  defaultChecked
+                  id="fpb-mode-checkbox"
+                  name="fpb-mode-checkbox"
+                  checked={fpbMode}
+                  onCheckedChange={(checked) => onFpbModeChange(checked === true)}
                 />
                 <FieldContent>
-                  <FieldLabel htmlFor="terms-checkbox-desc">
+                  <FieldLabel htmlFor="fpb-mode-checkbox">
                     FPB
                   </FieldLabel>
                   <FieldDescription>

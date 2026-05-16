@@ -10,8 +10,6 @@ type SettingsDrawerProps = {
   onToggleSoundEffect: (enabled: boolean) => void;
   backsoundEnabled: boolean;
   onToggleBacksound: (enabled: boolean) => void;
-  darkMode: boolean;
-  onToggleDarkMode: (enabled: boolean) => void;
 };
 
 type ToggleRowProps = {
@@ -65,8 +63,6 @@ export function SettingsDrawer({
   onToggleSoundEffect,
   backsoundEnabled,
   onToggleBacksound,
-  darkMode,
-  onToggleDarkMode,
 }: SettingsDrawerProps) {
   return (
     <>

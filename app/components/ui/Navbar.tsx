@@ -5,7 +5,6 @@ import Button from "./Button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft03Icon, Login02Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
 
 type NavbarProps = {
@@ -15,11 +14,9 @@ type NavbarProps = {
 
 export function Navbar({ onOpenSettings, hideLoginButton }: NavbarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const isAuthPage =
     pathname.startsWith("/login") ||
-    pathname.startsWith("/register") ||
-    pathname.startsWith("/verify-otp");
+    pathname.startsWith("/register");
   const shouldHideLogin = hideLoginButton ?? isAuthPage;
 
   return (
