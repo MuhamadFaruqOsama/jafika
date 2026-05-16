@@ -38,6 +38,7 @@ type QuestionCardItem = {
   public_access: boolean
   "3d_assistant": boolean
   created_at: string
+  created_at_label: string
 }
 
 type AdminQuestionCardProps = {
@@ -47,19 +48,6 @@ type AdminQuestionCardProps = {
 type DeleteResponse = {
   error?: string
   message?: string
-}
-
-function formatDate(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return "-"
-  }
-
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date)
 }
 
 function normalizeThumbnailSrc(value: string | null) {
@@ -105,7 +93,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
     return (
         <div className="bg-white border border-gray-200 p-4 rounded-lg hover:shadow-sm">
             <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">{formatDate(question.created_at)}</div>
+                <div className="text-sm text-gray-600">{question.created_at_label}</div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button

@@ -94,13 +94,13 @@ export function DialogAddQuestion() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <ButtonAdmin>
                     <HugeiconsIcon icon={AddInvoiceIcon} size={20}/>
                     Tambah Soal
                 </ButtonAdmin>
             </DialogTrigger>
-            <DialogContent className="bg-white min-w-[80%]">
+            <DialogContent className="bg-white min-w-[100%] md:min-w-[80%]">
                 <DialogHeader>
                     <DialogTitle className="text-lg">Buat Soal</DialogTitle>
                     <DialogDescription>

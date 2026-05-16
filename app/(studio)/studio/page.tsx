@@ -8,8 +8,8 @@ export default function Dashboard() {
         <>
             <AdminHeader title="Home" />
 
-            <div className="grid grid-cols-3 gap-4 mt-4">
-                <div className="col-span-2 border bg-white border-gray-200 p-2 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div className="col-span-1 md:col-span-2 border bg-white border-gray-200 p-2 rounded-lg">
                     <div className="text-gray-900 my-3 text-lg font-medium flex items-center gap-3">
                         Pengguna yang Terakhir Mengerjakan Soal Anda
                     </div>

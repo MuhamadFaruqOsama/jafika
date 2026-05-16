@@ -71,7 +71,7 @@ export function InputCorrectNumber({ values, onValuesChange }: InputCorrectNumbe
         </div>
       </FieldLabel>
 
-      <div className="grid grid-cols-2 gap-4 border border-gray-200 p-2 rounded-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-gray-200 p-2 rounded-md">
         {normalizedValues.map((numberValue, index) => (
           <div key={index} className="flex gap-3 items-center">
             <div>{index + 1}.</div>

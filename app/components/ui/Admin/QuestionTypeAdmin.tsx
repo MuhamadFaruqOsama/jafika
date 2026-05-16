@@ -25,7 +25,7 @@ export function QuestionTypeAdmin({
         <FieldLabel htmlFor="question-type" className="text-base">
             Jenis Soal
         </FieldLabel>
-        <div className="grid grid-cols-2 gap-4 border border-gray-200 p-2 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-gray-200 p-2 rounded-md">
             <FieldGroup>
               <Field orientation="horizontal">
                 <Checkbox
