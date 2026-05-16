@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { MoreVerticalSquare01Icon, Share05Icon } from "@hugeicons/core-free-icons"
+import { CheckmarkCircle03Icon, Globe02Icon, GlobeXIcon, MoreVerticalSquare01Icon, Share05Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -91,9 +91,23 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
     }
 
     return (
-        <div className="bg-white border border-gray-200 p-4 rounded-lg hover:shadow-sm">
+        <div className="bg-white border border-gray-200 p-2 rounded-lg hover:shadow-sm">
             <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">{question.created_at_label}</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-gray-600">{question.created_at_label}</div>
+                  <div className={'px-3 py-0.5 text-sm flex items-center gap-1 rounded-full ' + (question.public_access ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-700')}>
+                    {
+                      question.public_access ? 
+                      <HugeiconsIcon icon={Globe02Icon} size={15}/> :
+                      <HugeiconsIcon icon={GlobeXIcon} size={15}/>
+                    }
+                    {
+                      question.public_access ? 
+                      "publik" :
+                      "private"
+                    }
+                  </div>
+                </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button
@@ -146,10 +160,28 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                     </div>
                   )}
                 </div>
-                <div className="font-medium text-lg line-clamp-2 mt-5">
+                <div className="flex justify-end gap-1 text-sm font-semibold mt-5">
+                  {
+                    question.kpk_mode && (
+                      <div className="px-2 py-0.5 rounded-md bg-blue-400 text-white flex items-center gap-1">
+                        <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
+                        KPK
+                      </div>
+                    )
+                  }
+                  {
+                    question.fpb_mode && (
+                      <div className="px-2 py-0.5 rounded-md bg-orange-400 text-white flex items-center gap-1">
+                        <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
+                        FPB
+                      </div>
+                    )
+                  }
+                </div>
+                <div className="font-medium text-lg line-clamp-1 mt-2">
                     {question.title}
                 </div>
-                <div className="text-sm text-gray-600 mt-1">
+                <div className="text-sm text-gray-600 mt-1 line-clamp-2">
                     {question.description}
                 </div>
             </div>
