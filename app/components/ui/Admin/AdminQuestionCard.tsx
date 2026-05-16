@@ -94,7 +94,6 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
         <div className="bg-white border border-gray-200 p-2 rounded-lg hover:shadow-sm">
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <div className="text-sm text-gray-600">{question.created_at_label}</div>
                   <div className={'px-3 py-0.5 text-sm flex items-center gap-1 rounded-full ' + (question.public_access ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-700')}>
                     {
                       question.public_access ? 
@@ -107,6 +106,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                       "private"
                     }
                   </div>
+                  <div className="text-sm text-gray-600">{question.created_at_label}</div>
                 </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -160,7 +160,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                     </div>
                   )}
                 </div>
-                <div className="flex justify-end gap-1 text-sm font-semibold mt-5">
+                <div className="flex justify-start gap-1 text-sm font-semibold mt-5">
                   {
                     question.kpk_mode && (
                       <div className="px-2 py-0.5 rounded-md bg-pink-400 text-white flex items-center gap-1">
