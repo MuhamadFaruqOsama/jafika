@@ -119,7 +119,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                                 />
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-white border border-gray-200 p-2 min-w-50">
+                    <DropdownMenuContent className="bg-white border border-gray-200 p-1 min-w-50">
                         <DropdownMenuGroup>
                             <DropdownMenuItem
                               className="hover:bg-gray-100 p-2 cursor-pointer"
@@ -131,7 +131,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                                 Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              className="hover:bg-red-100 hover:text-red-600 p-2 cursor-pointer"
+                              className="p-2 cursor-pointer text-red-500 hover:bg-red-100"
                               onSelect={(event) => {
                                 event.preventDefault()
                                 setOpenDeleteDialog(true)

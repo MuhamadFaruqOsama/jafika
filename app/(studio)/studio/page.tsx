@@ -2,6 +2,7 @@ import { AdminHeader } from "../../components/ui/Admin/AdminHeader";
 import { AdminTable } from "../../components/ui/Admin/AdminTable";
 import { LastQuestionCardAdmin } from "../../components/ui/Admin/LastQuestionCardAdmin";
 import { TotalQuestionCardAdmin } from "../../components/ui/Admin/TotalQuestionCardAdmin";
+import { ParticipantRealtimeRefresher } from "../../components/ui/Admin/ParticipantRealtimeRefresher";
 import { createClient } from "@/lib/server";
 
 type QuestionRow = {
@@ -79,6 +80,7 @@ export default async function Dashboard() {
     return (
         <>
             <AdminHeader title="Home" />
+            <ParticipantRealtimeRefresher questionIds={questionIdList} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div className="col-span-1 md:col-span-2 border bg-white border-gray-200 p-2 rounded-lg">
