@@ -95,12 +95,19 @@ export async function POST(request: Request) {
     }
 
     const ownerId = authData.user.id
+    const creatorName = String(
+      authData.user.user_metadata?.nickname ??
+      authData.user.user_metadata?.username ??
+      authData.user.email ??
+      "Pengguna",
+    ).trim()
 
     const { data: createdQuestion, error: createQuestionError } = await supabase
       .from("question")
       .insert({
         uuid: randomUUID(),
         user_id: ownerId,
+        creator_name: creatorName || "Pengguna",
         title,
         kpk_mode: kpkMode,
         fpb_mode: fpbMode,

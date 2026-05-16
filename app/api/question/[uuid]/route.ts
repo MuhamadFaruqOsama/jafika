@@ -130,6 +130,12 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (authError || !authData.user) {
       return jsonError("Sesi login tidak valid. Silakan login ulang.", 401)
     }
+    const creatorName = String(
+      authData.user.user_metadata?.nickname ??
+      authData.user.user_metadata?.username ??
+      authData.user.email ??
+      "Pengguna",
+    ).trim()
 
     const { data: currentQuestion, error: currentQuestionError } = await supabase
       .from("question")
@@ -170,6 +176,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       .update({
         title,
         description,
+        creator_name: creatorName || "Pengguna",
         kpk_mode: kpkMode,
         fpb_mode: fpbMode,
         find_number: normalizedFindNumber,

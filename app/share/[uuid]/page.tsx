@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { createClient } from "@/lib/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { ShareQuestionStartCard } from "@/app/features/share/components/ShareQuestionStartCard"
 
 type SharePageProps = {
@@ -12,9 +12,21 @@ type SharedQuestion = {
   uuid: string
   title: string
   description: string
+  creator_name: string | null
+  thumbnail: string | null
+  find_number: unknown
   public_access: boolean
   kpk_mode: boolean
   fpb_mode: boolean
+  "3d_assistant": boolean
+}
+
+function normalizeFindNumber(value: unknown) {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item) => Number(item))
+    .filter((item) => Number.isFinite(item) && item > 0)
 }
 
 export default async function SharePage({ params }: SharePageProps) {
@@ -25,10 +37,10 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound()
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: question } = await supabase
     .from("question")
-    .select("uuid, title, description, public_access, kpk_mode, fpb_mode")
+    .select('uuid, title, description, creator_name, thumbnail, find_number, public_access, kpk_mode, fpb_mode, "3d_assistant"')
     .eq("uuid", normalizedUuid)
     .maybeSingle<SharedQuestion>()
 
@@ -36,14 +48,25 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound()
   }
 
+  const normalizedCorrectNumbers = normalizeFindNumber(question.find_number)
+  if (normalizedCorrectNumbers.length < 2 || (!question.kpk_mode && !question.fpb_mode)) {
+    notFound()
+  }
+
+  const creatorName = question.creator_name?.trim() || "Pengguna"
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50">
       <ShareQuestionStartCard
         uuid={question.uuid}
         title={question.title}
         description={question.description}
+        creatorName={creatorName}
+        thumbnail={question.thumbnail}
+        expectedInputCount={normalizedCorrectNumbers.length}
         kpk_mode={question.kpk_mode}
         fpb_mode={question.fpb_mode}
+        assistant3d={question["3d_assistant"]}
       />
     </div>
   )

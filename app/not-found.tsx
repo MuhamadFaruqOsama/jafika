@@ -10,16 +10,16 @@ export default function NotFound() {
           alt="JAFIKA"
           width={200}
           height={200}
-          className="-mb-14 w-[200px]"
+          className="-mb-14 w-50"
         />
       </nav>
 
       <div className="flex min-h-screen w-full items-center justify-center px-3 text-center md:px-6">
         <div className="flex flex-col">
-          <h1 className="text-4xl font-extrabold text-pink-500">
+          <h1 className="text-4xl font-bold text-pink-500">
             Halaman Tidak Ditemukan
           </h1>
-          <div className="mt-2 text-lg text-gray-700">
+          <div className="mt-2 text-gray-700">
             Ups.. Halaman yang Anda cari tidak ditemukan
           </div>
           <Link

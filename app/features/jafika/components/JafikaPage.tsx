@@ -14,11 +14,42 @@ import { NumberPreviewBar } from "@/app/features/jafika/components/NumberPreview
 import { Toaster } from "@/components/ui/sonner";
 import Button from "@/app/components/ui/Button";
 import Image from "next/image";
+import { toast } from "sonner";
 
-export function JafikaPage() {
+export type JafikaShareConfig = {
+  enabled: true;
+  questionUuid: string;
+  participantId: number;
+  participantName: string;
+  sessionStorageKey: string;
+  title: string;
+  description: string;
+  thumbnail: string | null;
+  expectedInputCount: number;
+  kpkMode: boolean;
+  fpbMode: boolean;
+  assistant3dEnabled: boolean;
+};
+
+type JafikaPageProps = {
+  shareConfig?: JafikaShareConfig;
+};
+
+export function JafikaPage({ shareConfig }: JafikaPageProps) {
+  const isShareMode = shareConfig?.enabled === true;
+  const expectedInputCount = isShareMode ? shareConfig.expectedInputCount : 0;
+  const hasLockedInputCount = isShareMode && expectedInputCount >= 2;
+  const isFpbModeEnabled = isShareMode ? shareConfig.fpbMode : true;
+  const isKpkModeEnabled = isShareMode ? shareConfig.kpkMode : true;
+  const showAiAssistantSetting = !(isShareMode && shareConfig?.assistant3dEnabled === false);
   const [loading, setLoading] = useState(true);
   const [showStartOverlay, setShowStartOverlay] = useState(false);
-  const game = useFpbGame();
+  const [showFinishOverlay, setShowFinishOverlay] = useState(false);
+  const [isShareStarting, setIsShareStarting] = useState(false);
+  const game = useFpbGame({
+    initialInputCount: hasLockedInputCount ? expectedInputCount : undefined,
+    lockInputCount: hasLockedInputCount,
+  });
   const backsoundRef = useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
   const distributionSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -33,6 +64,7 @@ export function JafikaPage() {
   const lastInvalidAtRef = useRef(0);
   const pendingClickTimeoutRef = useRef<number | null>(null);
   const hasPlayedFinishVoiceRef = useRef(false);
+  const hasMarkedShareFinishRef = useRef(false);
   const labelNumbers = game.numberInputs.map((value, index) => {
     const parsed = Number.parseInt(value, 10);
     return Number.isInteger(parsed) ? parsed : index + 1;
@@ -40,6 +72,15 @@ export function JafikaPage() {
   const previewNumbers = game.numberInputs
     .map((value) => Number.parseInt(value, 10))
     .filter((value) => Number.isInteger(value) && value > 0);
+  const shouldAskFpb = isFpbModeEnabled;
+  const shouldAskKpk = isKpkModeEnabled;
+  const fpbCompleted = !shouldAskFpb || game.showExplanation;
+  const kpkCompleted = !shouldAskKpk || game.showKpkExplanation;
+  const isShareCompleted =
+    isShareMode &&
+    game.isFinished &&
+    fpbCompleted &&
+    kpkCompleted;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -68,6 +109,20 @@ export function JafikaPage() {
       }
     }
   }, [game.isFinished, game.isSoundEffectEnabled]);
+
+  useEffect(() => {
+    if (!game.isFinished) {
+      setShowFinishOverlay(false);
+      return;
+    }
+
+    setShowFinishOverlay(true);
+    const timeout = window.setTimeout(() => {
+      setShowFinishOverlay(false);
+    }, 2000);
+
+    return () => window.clearTimeout(timeout);
+  }, [game.isFinished]);
 
   useEffect(() => {
     const audio = backsoundRef.current;
@@ -184,7 +239,81 @@ export function JafikaPage() {
     };
   }, [game.isSoundEffectEnabled]);
 
-  const handleStartDistribution = () => {
+  useEffect(() => {
+    if (!isShareCompleted || !shareConfig) return;
+    if (hasMarkedShareFinishRef.current) return;
+    hasMarkedShareFinishRef.current = true;
+
+    const markFinished = async () => {
+      try {
+        const response = await fetch(`/api/share/${shareConfig.questionUuid}/participant`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "finish",
+            participantId: shareConfig.participantId,
+          }),
+        });
+
+        if (!response.ok) {
+          const payload = (await response.json()) as { error?: string };
+          toast.error(payload.error ?? "Gagal menandai peserta selesai.");
+          return;
+        }
+
+        toast.success("Selamat! Kamu sudah menyelesaikan soal.");
+      } catch {
+        toast.error("Terjadi kendala jaringan saat menyimpan status selesai.");
+      }
+    };
+
+    void markFinished();
+  }, [isShareCompleted, shareConfig]);
+
+  const handleStartDistribution = async () => {
+    if (isShareMode && shareConfig) {
+      const parsedNumbers = game.numberInputs.map((value) => Number.parseInt(value, 10));
+      const isValid = parsedNumbers.every((value) => Number.isInteger(value) && value > 0);
+
+      if (!isValid || parsedNumbers.length !== expectedInputCount) {
+        toast.error("Isi semua bilangan dengan benar dulu sebelum mulai.");
+        return;
+      }
+
+      setIsShareStarting(true);
+      try {
+        const response = await fetch(`/api/share/${shareConfig.questionUuid}/participant`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "start",
+            participantId: shareConfig.participantId,
+            numbers: parsedNumbers,
+          }),
+        });
+
+        if (!response.ok) {
+          const payload = (await response.json()) as { error?: string };
+          if (response.status === 404) {
+            window.localStorage.removeItem(shareConfig.sessionStorageKey);
+            window.location.reload();
+            return;
+          }
+          toast.error(payload.error ?? "Belum bisa memulai sesi.");
+          return;
+        }
+      } catch {
+        toast.error("Terjadi kendala jaringan saat memulai sesi.");
+        return;
+      } finally {
+        setIsShareStarting(false);
+      }
+    }
+
     const started = game.startDistribution();
     if (!started) return;
 
@@ -241,7 +370,7 @@ export function JafikaPage() {
         </div>
       )}
 
-      {game.isFinished && (
+      {showFinishOverlay && (
         <div className="fixed inset-0 z-9999999 flex items-center justify-center bg-black/50">
           <Image
             src="/img/tentuin-jawaban.png"
@@ -255,6 +384,7 @@ export function JafikaPage() {
 
       <Navbar
         onOpenSettings={() => game.setSettingsOpen(true)}
+        hideAuthAction={isShareMode}
       />
 
       {game.hasStartedDistribution && !showStartOverlay && (
@@ -267,20 +397,54 @@ export function JafikaPage() {
         >
           {(!game.hasStartedDistribution || showStartOverlay) && (
             <div className="">
+              {isShareMode && shareConfig && (
+                <>
+                  <div className="shadow-sm mb-2 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
+                    Soal Sharing
+                  </div>
+                  <div className="rounded-4xl border border-gray-200 bg-white p-4 shadow-sm mb-10">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                        {shareConfig.thumbnail ? (
+                          <Image
+                            src={shareConfig.thumbnail}
+                            alt={shareConfig.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                            Belum ada thumbnail
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
+                        <p className="mt-2 text-gray-700">{shareConfig.description}</p>
+                        <p className="mt-3 text-gray-600">
+                          Peserta: <span>{shareConfig.participantName}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
               <div className="shadow-sm mb-2 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
                 Masukkan bilangan dulu sebelum memulai yaa
               </div>
               <div className="bg-white border border-gray-200 shadow-sm px-4 py-6 rounded-4xl  dark:bg-black/40 dark:border-gray-800/50">
-                <div className="flex justify-end gap-3 mb-10">
-                  <Button variant="secondary" onClick={game.addNumberInput}>
-                    {/* <HugeiconsIcon icon={PlusSignCircleIcon} size={20} strokeWidth={3} /> */}
-                    Tambah Bilangan
-                  </Button>
-                  <Button variant="secondary" onClick={game.removeNumberInput}>
-                    {/* <HugeiconsIcon icon={MinusSignCircleIcon} size={20} strokeWidth={3} /> */}
-                    Hapus Bilangan
-                  </Button>
-                </div>
+                {!hasLockedInputCount && (
+                  <div className="flex justify-end gap-3 mb-10">
+                    <Button variant="secondary" onClick={game.addNumberInput}>
+                      Tambah Bilangan
+                    </Button>
+                    <Button variant="secondary" onClick={game.removeNumberInput}>
+                      Hapus Bilangan
+                    </Button>
+                  </div>
+                )}
                 <NumberInputList
                   values={game.numberInputs}
                   locked={game.isNumbersLocked}
@@ -292,8 +456,9 @@ export function JafikaPage() {
                     data-sfx="none"
                     className="w-full justify-center rounded-full py-2 text-xl font-bold"
                     onClick={handleStartDistribution}
+                    disabled={isShareStarting}
                   >
-                    Mulai
+                    {isShareStarting ? "Memvalidasi..." : "Mulai"}
                   </Button>
                 </div>
               </div>
@@ -346,7 +511,7 @@ export function JafikaPage() {
             )}
           </div>
 
-          {game.isFinished && (
+          {game.isFinished && shouldAskFpb && (
             <FactorSelectionCard
               id="hasil-fpb"
               variant="FPB"
@@ -363,11 +528,15 @@ export function JafikaPage() {
             />
           )}
 
-          {game.showExplanation && (
+          {game.isFinished && shouldAskKpk && (!shouldAskFpb || game.showExplanation) && (
             <FactorSelectionCard
               id="hasil-kpk"
               variant="KPK"
-              promptTitle="Lanjutkan: pilih faktor KPK di bawah ini."
+              promptTitle={
+                shouldAskFpb
+                  ? "Lanjutkan: pilih faktor KPK di bawah ini."
+                  : "Pilih faktor KPK di bawah ini."
+              }
               factorOptions={game.factorOptions}
               selectedFactors={game.selectedKpkFactors}
               onToggle={game.toggleKpkFactor}
@@ -378,6 +547,12 @@ export function JafikaPage() {
               explanationFaktorList={game.expectedKpkAnswer.faktorList}
               explanationLabel="KPK"
             />
+          )}
+
+          {game.isFinished && fpbCompleted && kpkCompleted && (
+            <div className="bg-green-100 text-green-900 text-lg py-2 text-center border border-green-200 rounded-xl mt-5">
+              Selamat, Anda telah menyelesaikan soal
+            </div>
           )}
         </div>
       </div>
@@ -394,6 +569,7 @@ export function JafikaPage() {
         onToggleSoundEffect={game.toggleSoundEffect}
         backsoundEnabled={game.isBacksoundEnabled}
         onToggleBacksound={game.toggleBacksound}
+        showAiAssistant={showAiAssistantSetting}
       />
 
       <ObjectPickerModal

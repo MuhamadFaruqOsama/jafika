@@ -1,35 +1,78 @@
 "use client"
 
-import { CheckmarkCircle03Icon } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
+import Image from "next/image"
+import { JafikaPage } from "@/app/features/jafika/components/JafikaPage"
 
 type ShareQuestionStartCardProps = {
   uuid: string
   title: string
   description: string
+  creatorName: string
+  thumbnail: string | null
+  expectedInputCount: number
   kpk_mode: boolean
   fpb_mode: boolean
+  assistant3d: boolean
 }
 
 type ApiResponse = {
   error?: string
   message?: string
+  participantId?: number
 }
 
 export function ShareQuestionStartCard({
   uuid,
   title,
   description,
+  creatorName,
+  thumbnail,
+  expectedInputCount,
   kpk_mode,
-  fpb_mode
+  fpb_mode,
+  assistant3d,
 }: ShareQuestionStartCardProps) {
+  const storageKey = useMemo(() => `jafika-share-session:${uuid}`, [uuid])
   const [name, setName] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [participantId, setParticipantId] = useState<number | null>(null)
+  const [participantName, setParticipantName] = useState("")
+
+  useEffect(() => {
+    const rawSession = window.localStorage.getItem(storageKey)
+    if (!rawSession) return
+
+    try {
+      const parsed = JSON.parse(rawSession) as {
+        participantId?: number
+        participantName?: string
+      }
+      const storedParticipantId = Number(parsed.participantId)
+
+      if (
+        Number.isInteger(storedParticipantId) &&
+        storedParticipantId > 0 &&
+        typeof parsed.participantName === "string" &&
+        parsed.participantName.trim().length >= 2
+      ) {
+        setParticipantId(storedParticipantId)
+        setParticipantName(parsed.participantName.trim())
+      }
+    } catch {
+      window.localStorage.removeItem(storageKey)
+    }
+  }, [storageKey])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    const trimmedName = name.replace(/\s+/g, " ").trim()
+    if (trimmedName.length < 2) {
+      toast.error("Nama peserta minimal 2 karakter.")
+      return
+    }
 
     setIsSubmitting(true)
     try {
@@ -38,7 +81,7 @@ export function ShareQuestionStartCard({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: trimmedName }),
       })
 
       const payload = (await response.json()) as ApiResponse
@@ -48,7 +91,21 @@ export function ShareQuestionStartCard({
       }
 
       toast.success(payload.message ?? "Data peserta tersimpan.")
-      setName("")
+      const nextParticipantId = Number(payload.participantId)
+      if (!Number.isInteger(nextParticipantId) || nextParticipantId <= 0) {
+        toast.error("ID peserta tidak ditemukan. Silakan coba lagi.")
+        return
+      }
+
+      setParticipantId(nextParticipantId)
+      setParticipantName(trimmedName)
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          participantId: nextParticipantId,
+          participantName: trimmedName,
+        }),
+      )
     } catch {
       toast.error("Terjadi kendala jaringan. Coba lagi.")
     } finally {
@@ -56,35 +113,53 @@ export function ShareQuestionStartCard({
     }
   }
 
+  if (participantId) {
+    return (
+      <JafikaPage
+        shareConfig={{
+          enabled: true,
+          questionUuid: uuid,
+          participantId,
+          participantName,
+          sessionStorageKey: storageKey,
+          title,
+          description,
+          thumbnail,
+          expectedInputCount,
+          kpkMode: kpk_mode,
+          fpbMode: fpb_mode,
+          assistant3dEnabled: assistant3d,
+        }}
+      />
+    )
+  }
+
   return (
-    <div className="mx-auto mt-10 w-full md:max-w-2xl rounded-lg border border-gray-200 bg-white p-3">
+    <div className="mx-auto w-full md:max-w-2xl rounded-lg border border-gray-200 bg-white p-3">
       <div className="mb-4 text-sm text-white font-semibold bg-pink-400 py-0.5 px-3 rounded-full w-fit">
         Share Soal
       </div>
       <div className="text-gray-600 mt-4">
+        <div className="relative mb-4 aspect-video w-full overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+          {thumbnail ? (
+            <Image
+              src={thumbnail}
+              alt={title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-sm text-gray-500">
+              Belum ada thumbnail
+            </div>
+          )}
+        </div>
+        <div className="my-5 text-end">
+          <p>Dibuat oleh: <span>{creatorName}</span></p>
+        </div>
         <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
         <p>{description}</p>
-        <div className="mt-4">
-          <p>Dibuat oleh: </p>
-          <p className="flex gap-2 items-center">Jenis soal:
-            {
-              kpk_mode && (
-                <div className="px-2 py-0.5 rounded-md bg-pink-400 text-white flex items-center gap-1 text-sm font-semibold">
-                  <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
-                  KPK
-                </div>
-              )
-            }
-            {
-              fpb_mode && (
-                <div className="px-2 py-0.5 rounded-md bg-orange-400 text-white flex items-center gap-1 text-sm font-semibold">
-                  <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
-                  FPB
-                </div>
-              )
-            }
-          </p>
-        </div>
       </div>
 
       <form className="mt-6" onSubmit={handleSubmit}>

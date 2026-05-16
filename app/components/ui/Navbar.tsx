@@ -10,9 +10,10 @@ import Link from "next/link";
 type NavbarProps = {
   onOpenSettings?: () => void;
   hideLoginButton?: boolean;
+  hideAuthAction?: boolean;
 };
 
-export function Navbar({ onOpenSettings, hideLoginButton }: NavbarProps) {
+export function Navbar({ onOpenSettings, hideLoginButton, hideAuthAction = false }: NavbarProps) {
   const pathname = usePathname();
   const isAuthPage =
     pathname.startsWith("/login") ||
@@ -36,13 +37,13 @@ export function Navbar({ onOpenSettings, hideLoginButton }: NavbarProps) {
               <span className="hidden md:block">Settings</span>
             </Button>
           )}
-          {!shouldHideLogin && (
+          {!hideAuthAction && !shouldHideLogin && (
             <Link className="main-button" href="/login">
               <HugeiconsIcon icon={Login02Icon} size={20} strokeWidth={3} />
               <span className="hidden md:block">Login</span>
             </Link>
           )}
-          {shouldHideLogin && (
+          {!hideAuthAction && shouldHideLogin && (
             <Link className="main-button" href="/">
               <HugeiconsIcon icon={ArrowLeft03Icon} size={20} strokeWidth={3} />
               <span className="hidden md:block">Back</span>

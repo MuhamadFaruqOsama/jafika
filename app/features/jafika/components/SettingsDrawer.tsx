@@ -10,6 +10,7 @@ type SettingsDrawerProps = {
   onToggleSoundEffect: (enabled: boolean) => void;
   backsoundEnabled: boolean;
   onToggleBacksound: (enabled: boolean) => void;
+  showAiAssistant?: boolean;
 };
 
 type ToggleRowProps = {
@@ -63,6 +64,7 @@ export function SettingsDrawer({
   onToggleSoundEffect,
   backsoundEnabled,
   onToggleBacksound,
+  showAiAssistant = true,
 }: SettingsDrawerProps) {
   return (
     <>
@@ -159,11 +161,13 @@ export function SettingsDrawer({
             checked={backsoundEnabled}
             onCheckedChange={onToggleBacksound}
           />
-          <ToggleRow
-            title="AI Assistant"
-            subtitle="Membantu dan menemani Anda dalam pembelajaran."
-            iconClass="hgi hgi-stroke hgi-ai-network"
-          />
+          {showAiAssistant && (
+            <ToggleRow
+              title="AI Assistant"
+              subtitle="Membantu dan menemani Anda dalam pembelajaran."
+              iconClass="hgi hgi-stroke hgi-ai-network"
+            />
+          )}
           {/* <ToggleRow
             title="Dark Mode"
             subtitle="Simpan preferensi mode gelap di perangkat ini."

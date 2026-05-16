@@ -17,8 +17,13 @@ const BACKSOUND_STORAGE_KEY = "jafika-backsound-enabled";
 const SOUND_EFFECT_STORAGE_KEY = "jafika-sound-effect-enabled";
 type ThemeMode = "light" | "dark";
 
-function createDefaultInputs(): string[] {
-  return Array.from({ length: MIN_INPUT_COUNT }, () => "");
+type UseFpbGameOptions = {
+  initialInputCount?: number;
+  lockInputCount?: boolean;
+};
+
+function createDefaultInputs(count = MIN_INPUT_COUNT): string[] {
+  return Array.from({ length: count }, () => "");
 }
 
 export function buildSelectionKey(
@@ -29,7 +34,13 @@ export function buildSelectionKey(
   return `${groupIndex}|${prime}|${exp}`;
 }
 
-export function useFpbGame() {
+export function useFpbGame(options?: UseFpbGameOptions) {
+  const defaultInputCount = Math.max(
+    MIN_INPUT_COUNT,
+    options?.initialInputCount ?? MIN_INPUT_COUNT,
+  );
+  const lockInputCount = options?.lockInputCount ?? false;
+
   const getInitialThemeMode = (): ThemeMode => {
     if (typeof window === "undefined") return "light";
     return window.localStorage.getItem(THEME_STORAGE_KEY) === "dark"
@@ -49,7 +60,9 @@ export function useFpbGame() {
     return saved === null ? true : saved === "true";
   };
 
-  const [numberInputs, setNumberInputs] = useState<string[]>(createDefaultInputs);
+  const [numberInputs, setNumberInputs] = useState<string[]>(() =>
+    createDefaultInputs(defaultInputCount),
+  );
   const [isNumbersLocked, setIsNumbersLocked] = useState(false);
   const [hasStartedDistribution, setHasStartedDistribution] = useState(false);
   const [currentDividerInput, setCurrentDividerInput] = useState("");
@@ -162,6 +175,11 @@ export function useFpbGame() {
   }
 
   function addNumberInput() {
+    if (lockInputCount) {
+      showError("Jumlah bilangan mengikuti soal yang dibagikan.");
+      return;
+    }
+
     if (isNumbersLocked) {
       showError("Reset game dulu untuk mengubah jumlah bilangan.");
       return;
@@ -171,6 +189,11 @@ export function useFpbGame() {
   }
 
   function removeNumberInput() {
+    if (lockInputCount) {
+      showError("Jumlah bilangan mengikuti soal yang dibagikan.");
+      return;
+    }
+
     if (isNumbersLocked) {
       showError("Reset game dulu untuk mengubah jumlah bilangan.");
       return;
@@ -375,7 +398,7 @@ export function useFpbGame() {
   }
 
   function resetGame() {
-    setNumberInputs(createDefaultInputs());
+    setNumberInputs(createDefaultInputs(defaultInputCount));
     setIsNumbersLocked(false);
     setHasStartedDistribution(false);
     setCurrentDividerInput("");

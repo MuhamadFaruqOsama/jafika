@@ -2,7 +2,21 @@ import { DocumentValidationIcon, LinkForwardIcon } from "@hugeicons/core-free-ic
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 
-export function LastQuestionCardAdmin() {
+type LastQuestionCardAdminProps = {
+    latestCreatedAtLabel: string;
+    latestQuestionWorkedBy: number;
+    latestQuestionUuid?: string | null;
+}
+
+export function LastQuestionCardAdmin({
+    latestCreatedAtLabel,
+    latestQuestionWorkedBy,
+    latestQuestionUuid,
+}: LastQuestionCardAdminProps) {
+    const latestQuestionHref = latestQuestionUuid
+      ? `/studio/soal/detail?uuid=${latestQuestionUuid}`
+      : "/studio/soal";
+
     return (
         <div className="bg-white border border-gray-200 w-full rounded-lg p-3 transition-all duration-150 hover:shadow-md">
             <div className="flex items-end gap-3">
@@ -14,16 +28,16 @@ export function LastQuestionCardAdmin() {
             <div className="border-t border-gray-200 mt-4 pt-4 text-gray-600 space-y-3">
                 <div className="flex justify-between items-center">
                     <span>Soal dibuat pada</span>
-                    <span>12 Jun 2026</span>
+                    <span>{latestCreatedAtLabel}</span>
                 </div>
                 <div className="flex justify-between items-center">
                     <span>Dikerjakan oleh</span>
-                    <span>12 murid</span>
+                    <span>{latestQuestionWorkedBy} murid</span>
                 </div>
             </div>
             <div className="border-t border-gray-200 mt-4 pt-4">
                 <Link
-                    href={'soal/history'}
+                    href={latestQuestionHref}
                     className="flex items-center justify-center gap-2 bg-blue-400 rounded-md py-2 text-white"
                 >
                     Pantau

@@ -23,6 +23,7 @@ type QuestionDetail = {
   public_access: boolean
   kpk_mode: boolean
   fpb_mode: boolean
+  find_number: unknown
 }
 
 type ParticipantRow = {
@@ -46,6 +47,14 @@ function formatCreatedAtLabel(value: string) {
   }).format(date)
 }
 
+function normalizeFindNumber(value: unknown) {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item) => Number(item))
+    .filter((item) => Number.isFinite(item) && item > 0)
+}
+
 export default async function RootLayout({ searchParams }: DetailPageProps) {
     const params = await searchParams
     const uuid = params.uuid?.trim() ?? ""
@@ -63,7 +72,7 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
 
     const { data: question } = await supabase
       .from("question")
-      .select("id, uuid, title, description, thumbnail, created_at, public_access, kpk_mode, fpb_mode")
+      .select("id, uuid, title, description, thumbnail, created_at, public_access, kpk_mode, fpb_mode, find_number")
       .eq("uuid", uuid)
       .eq("user_id", authUserId)
       .maybeSingle<QuestionDetail>()
@@ -86,6 +95,7 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
     const baseUrl = getAppBaseUrl()
     const shareLink = `${baseUrl}/share/${question.uuid}`
     const createdAtLabel = formatCreatedAtLabel(question.created_at)
+    const findNumbers = normalizeFindNumber(question.find_number)
 
     return (
         <div className="mt-5 pb-20">
@@ -120,7 +130,7 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
                             <div className="text-sm text-gray-500">dibuat pada</div>
                             <div className="text-base font-medium">{createdAtLabel}</div>
                           </div>
-                          <div className="-space-y-0.5">
+                          <div className="space-y-0">
                             <div className="text-sm text-gray-500">aksesibilitas</div>
                             <div className="text-base font-medium">
                               <div className={'px-3 py-0.5 text-sm w-fit flex items-center gap-1 rounded-full ' + (question.public_access ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-700')}>
@@ -137,7 +147,7 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
                               </div>
                             </div>
                           </div>
-                          <div className="-space-y-0.5">
+                          <div className="space-y-0">
                             <div className="text-sm text-gray-500">tipe soal</div>
                             <div className="text-base font-medium">
                               <div className="flex justify-start gap-1 text-sm font-semibold">
@@ -158,6 +168,25 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
                                 )
                               }
                             </div>
+                            </div>
+                          </div>
+                          <div className="space-y-0">
+                            <div className="text-sm text-gray-500">angka yang dicari</div>
+                            <div className="text-base font-medium">
+                              {findNumbers.length === 0 ? (
+                                <span>-</span>
+                              ) : (
+                                <div className="flex flex-wrap gap-1">
+                                  {findNumbers.map((value, index) => (
+                                    <span
+                                      key={`${value}-${index}`}
+                                      className="rounded-md bg-pink-100 px-2 py-0.5 text-sm text-pink-700"
+                                    >
+                                      {value}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
