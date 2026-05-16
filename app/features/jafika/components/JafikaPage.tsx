@@ -15,6 +15,8 @@ import { Toaster } from "@/components/ui/sonner";
 import Button from "@/app/components/ui/Button";
 import Image from "next/image";
 import { toast } from "sonner";
+import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type JafikaShareConfig = {
   enabled: true;
@@ -395,47 +397,91 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         <div
           className={`w-full px-3 md:px-6 ${game.hasStartedDistribution ? "mt-5 pt-5" : "mt-20"}`}
         >
+          {isShareMode && shareConfig && (
+            <>
+              <div className="shadow-sm mb-2 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
+                Soal Sharing
+              </div>
+              <div className="rounded-4xl border border-gray-200 bg-white p-4 shadow-sm mb-5">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                    {shareConfig.thumbnail ? (
+                      <Image
+                        src={shareConfig.thumbnail}
+                        alt={shareConfig.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                        Belum ada thumbnail
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
+                    <p className="mt-2 text-gray-700">{shareConfig.description}</p>
+                    <p className="mt-3 text-gray-600">
+                      Peserta: <span>{shareConfig.participantName}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          
           {(!game.hasStartedDistribution || showStartOverlay) && (
             <div className="">
-              {isShareMode && shareConfig && (
-                <>
-                  <div className="shadow-sm mb-2 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
-                    Soal Sharing
-                  </div>
-                  <div className="rounded-4xl border border-gray-200 bg-white p-4 shadow-sm mb-10">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-                        {shareConfig.thumbnail ? (
-                          <Image
-                            src={shareConfig.thumbnail}
-                            alt={shareConfig.title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-sm text-gray-500">
-                            Belum ada thumbnail
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
-                        <p className="mt-2 text-gray-700">{shareConfig.description}</p>
-                        <p className="mt-3 text-gray-600">
-                          Peserta: <span>{shareConfig.participantName}</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
               <div className="shadow-sm mb-2 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
-                Masukkan bilangan dulu sebelum memulai yaa
+                {
+                  isShareMode && shareConfig ? 'Mari pecahkan masalah tersebut' : 'Masukkan bilangan dulu sebelum memulai yaa'
+                }
               </div>
               <div className="bg-white border border-gray-200 shadow-sm px-4 py-6 rounded-4xl  dark:bg-black/40 dark:border-gray-800/50">
-                {!hasLockedInputCount && (
+                {/* menentukan apakah kpk atau fpb */}
+                {
+                  isShareMode && shareConfig && (
+                    <>
+                      <div className="px-4 py-1 bg-pink-100 text-black rounded-full w-fit">
+                        1. Tentuin jenis faktorisasinya dulu yaa
+                      </div>
+                      <small className="text-gray-500 ms-3">Berdasarkan soal tersebut, faktorisasi mana yang tepat? Apakah KPK? atau FPB? atau dua-duanya?</small>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <FieldLabel>
+                          <Field orientation="horizontal">
+                            <Checkbox id="kpk" name="kpk" />
+                            <FieldContent>
+                              <FieldTitle>KPK</FieldTitle>
+                              <FieldDescription>
+                                Kelipatan Persekutuan Terkecil.
+                              </FieldDescription>
+                            </FieldContent>
+                          </Field>
+                        </FieldLabel>
+                        <FieldLabel>
+                          <Field orientation="horizontal">
+                            <Checkbox id="fpb" name="fpb" />
+                            <FieldContent>
+                              <FieldTitle>FPB</FieldTitle>
+                              <FieldDescription>
+                                Faktor Persekutuan Terbesar.
+                              </FieldDescription>
+                            </FieldContent>
+                          </Field>
+                        </FieldLabel>
+                      </div>
+
+                      <div className="px-4 py-1 bg-pink-100 text-black rounded-full w-fit mt-10">
+                        2. Lalu Tentuin bilangannya
+                      </div>
+                      <small className="text-gray-500 ms-3">Tentukan ada berapa bilangan yang difaktorisasi dan berapa saja ya kira-kira?</small>
+                    </>
+                  )
+                }
+                
+                {/* {!hasLockedInputCount && (
                   <div className="flex justify-end gap-3 mb-10">
                     <Button variant="secondary" onClick={game.addNumberInput}>
                       Tambah Bilangan
@@ -444,7 +490,15 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                       Hapus Bilangan
                     </Button>
                   </div>
-                )}
+                )} */}
+                <div className="flex justify-end gap-3">
+                  <Button variant="secondary" onClick={game.addNumberInput}>
+                    Tambah Bilangan
+                  </Button>
+                  <Button variant="secondary" onClick={game.removeNumberInput}>
+                    Hapus Bilangan
+                  </Button>
+                </div>
                 <NumberInputList
                   values={game.numberInputs}
                   locked={game.isNumbersLocked}

@@ -59,7 +59,7 @@ export function NumberPreviewBar({ numbers }: NumberPreviewBarProps) {
           <button
             type="button"
             onClick={() => setIsStickyEnabled((prev) => !prev)}
-            className="absolute -right-10 rounded-full border border-gray-200 bg-white p-2 text-gray-700 shadow-md transition hover:bg-gray-50 cursor-pointer"
+            className="absolute -right-2 -top-3 z-50 rounded-full border border-gray-200 bg-white p-2 text-gray-700 shadow-md transition hover:bg-gray-50 cursor-pointer"
             aria-label={isStickyEnabled ? "Matikan sticky" : "Aktifkan sticky"}
             title={isStickyEnabled ? "Matikan sticky" : "Aktifkan sticky"}
           >
@@ -70,10 +70,10 @@ export function NumberPreviewBar({ numbers }: NumberPreviewBarProps) {
               {numbers.map((number, index) => (
                 <div
                   key={`${index}-${number}`}
-                  className="rounded-2xl text-center border border-gray-200 bg-white px-5 py-2 text-gray-600 dark:border-pink-400/60 dark:bg-pink-900/20 dark:text-pink-200"
+                  className="rounded-2xl text-sm md:text-base text-center border border-gray-200 bg-white px-5 py-2 text-gray-600 dark:border-pink-400/60 dark:bg-pink-900/20 dark:text-pink-200"
                 >
                   Bilangan ke-{index + 1}
-                  <div className="font-extrabold text-4xl text-pink-500 mt-2">
+                  <div className="font-extrabold text-2xl md:text-4xl text-pink-500 mt-2">
                     {number}
                   </div>
                 </div>
