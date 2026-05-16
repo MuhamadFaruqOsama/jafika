@@ -163,7 +163,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                 <div className="flex justify-end gap-1 text-sm font-semibold mt-5">
                   {
                     question.kpk_mode && (
-                      <div className="px-2 py-0.5 rounded-md bg-blue-400 text-white flex items-center gap-1">
+                      <div className="px-2 py-0.5 rounded-md bg-pink-400 text-white flex items-center gap-1">
                         <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
                         KPK
                       </div>
