@@ -1,8 +1,7 @@
-import { randomUUID } from "crypto"
-import { mkdir, writeFile } from "fs/promises"
-import { extname, join } from "path"
+import { extname } from "path"
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/server"
+import { uploadQuestionMaterial, uploadQuestionThumbnail } from "@/lib/supabase/storage"
 
 type RouteContext = {
   params: Promise<{
@@ -17,15 +16,6 @@ function jsonError(message: string, status = 400) {
 function toBoolean(value: FormDataEntryValue | null, fallback: boolean) {
   if (typeof value !== "string") return fallback
   return value === "true"
-}
-
-function sanitizeBaseName(name: string) {
-  return name
-    .toLowerCase()
-    .replace(/\.[^/.]+$/, "")
-    .replace(/[^a-z0-9-_]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
 }
 
 function isPdfFile(file: File) {
@@ -162,16 +152,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         return jsonError("Materi harus berformat PDF.")
       }
 
-      const safeBaseName = sanitizeBaseName(materialFile.name) || "material"
-      const uniqueFileName = `${Date.now()}-${safeBaseName}-${randomUUID()}.pdf`
-      const uploadDir = join(process.cwd(), "public", "material")
-      const uploadPath = join(uploadDir, uniqueFileName)
-
-      await mkdir(uploadDir, { recursive: true })
-      const bytes = await materialFile.arrayBuffer()
-      await writeFile(uploadPath, Buffer.from(bytes))
-
-      material = `/material/${uniqueFileName}`
+      material = await uploadQuestionMaterial(materialFile)
     }
 
     let thumbnail = currentQuestion.thumbnail as string | null
@@ -180,18 +161,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         return jsonError("Thumbnail harus berupa gambar.")
       }
 
-      const rawExt = extname(thumbnailFile.name).toLowerCase()
-      const extension = rawExt || ".jpg"
-      const safeBaseName = sanitizeBaseName(thumbnailFile.name) || "thumbnail"
-      const uniqueFileName = `${Date.now()}-${safeBaseName}-${randomUUID()}${extension}`
-      const uploadDir = join(process.cwd(), "public", "img", "thumbnail")
-      const uploadPath = join(uploadDir, uniqueFileName)
-
-      await mkdir(uploadDir, { recursive: true })
-      const bytes = await thumbnailFile.arrayBuffer()
-      await writeFile(uploadPath, Buffer.from(bytes))
-
-      thumbnail = `/img/thumbnail/${uniqueFileName}`
+      thumbnail = await uploadQuestionThumbnail(thumbnailFile)
     }
 
     const { error: updateError } = await supabase
