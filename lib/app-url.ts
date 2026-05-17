@@ -13,6 +13,5 @@ export function getAppBaseUrl() {
     return trimSlash(fromEnv.trim())
   }
 
-  // return "http://localhost:3000"
-  return "https://5nfmgtzk-3000.asse.devtunnels.ms/"
+  return "http://localhost:3000"
 }
