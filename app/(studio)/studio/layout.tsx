@@ -10,10 +10,12 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     const supabase = await createClient();
-    const { data } = await supabase.auth.getClaims();
-    const userId = data?.claims?.claims?.sub;
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (error || !user) {
         redirect("/login");
     }
 
