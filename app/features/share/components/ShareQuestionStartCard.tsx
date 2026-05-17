@@ -4,14 +4,15 @@ import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import Image from "next/image"
 import { JafikaPage } from "@/app/features/jafika/components/JafikaPage"
+import { MaterialDownload } from "@/app/components/ui/MaterialDownload"
 
 type ShareQuestionStartCardProps = {
   uuid: string
   title: string
   description: string
   creatorName: string
+  material: string | null
   thumbnail: string | null
-  expectedInputCount: number
   kpk_mode: boolean
   fpb_mode: boolean
   assistant3d: boolean
@@ -28,8 +29,8 @@ export function ShareQuestionStartCard({
   title,
   description,
   creatorName,
+  material,
   thumbnail,
-  expectedInputCount,
   kpk_mode,
   fpb_mode,
   assistant3d,
@@ -124,8 +125,8 @@ export function ShareQuestionStartCard({
           sessionStorageKey: storageKey,
           title,
           description,
+          material,
           thumbnail,
-          expectedInputCount,
           kpkMode: kpk_mode,
           fpbMode: fpb_mode,
           assistant3dEnabled: assistant3d,
@@ -155,6 +156,7 @@ export function ShareQuestionStartCard({
             </div>
           )}
         </div>
+        <MaterialDownload materialPath={material} />
         <div className="my-5 text-end">
           <p>Dibuat oleh: <span>{creatorName}</span></p>
         </div>

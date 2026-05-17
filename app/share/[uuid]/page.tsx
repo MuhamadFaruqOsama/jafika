@@ -13,6 +13,7 @@ type SharedQuestion = {
   title: string
   description: string
   creator_name: string | null
+  material: string | null
   thumbnail: string | null
   find_number: unknown
   public_access: boolean
@@ -40,7 +41,7 @@ export default async function SharePage({ params }: SharePageProps) {
   const supabase = createAdminClient()
   const { data: question } = await supabase
     .from("question")
-    .select('uuid, title, description, creator_name, thumbnail, find_number, public_access, kpk_mode, fpb_mode, "3d_assistant"')
+    .select('uuid, title, description, creator_name, material, thumbnail, find_number, public_access, kpk_mode, fpb_mode, "3d_assistant"')
     .eq("uuid", normalizedUuid)
     .maybeSingle<SharedQuestion>()
 
@@ -62,8 +63,8 @@ export default async function SharePage({ params }: SharePageProps) {
         title={question.title}
         description={question.description}
         creatorName={creatorName}
+        material={question.material}
         thumbnail={question.thumbnail}
-        expectedInputCount={normalizedCorrectNumbers.length}
         kpk_mode={question.kpk_mode}
         fpb_mode={question.fpb_mode}
         assistant3d={question["3d_assistant"]}

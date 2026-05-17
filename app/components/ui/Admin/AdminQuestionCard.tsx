@@ -31,6 +31,7 @@ type QuestionCardItem = {
   uuid: string
   title: string
   description: string
+  material: string | null
   kpk_mode: boolean
   fpb_mode: boolean
   find_number: unknown
@@ -225,6 +226,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                 uuid: question.uuid,
                 title: question.title,
                 description: question.description,
+                material: question.material,
                 kpk_mode: question.kpk_mode,
                 fpb_mode: question.fpb_mode,
                 find_number: question.find_number,

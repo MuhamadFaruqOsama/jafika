@@ -20,6 +20,7 @@ type QuestionDetail = {
   uuid: string
   title: string
   description: string
+  material: string | null
   thumbnail: string | null
   created_at: string
   public_access: boolean
@@ -74,7 +75,7 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
 
     const { data: question } = await supabase
       .from("question")
-      .select("id, uuid, title, description, thumbnail, created_at, public_access, kpk_mode, fpb_mode, find_number")
+      .select("id, uuid, title, description, material, thumbnail, created_at, public_access, kpk_mode, fpb_mode, find_number")
       .eq("uuid", uuid)
       .eq("user_id", authUserId)
       .maybeSingle<QuestionDetail>()
@@ -123,7 +124,7 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
                             </div>
                           )}
                         </div>
-                        <MaterialDownload/>
+                        <MaterialDownload materialPath={question.material} />
                       </div>
 
                       {/* title */}

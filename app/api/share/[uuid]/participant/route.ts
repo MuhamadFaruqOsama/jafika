@@ -15,6 +15,8 @@ type FinishBody = {
   action?: "start" | "finish"
   participantId?: number
   numbers?: number[]
+  kpkMode?: boolean
+  fpbMode?: boolean
 }
 
 function jsonError(message: string, status = 400) {
@@ -47,7 +49,7 @@ export async function POST(request: Request, context: RouteContext) {
     const supabase = createAdminClient()
     const { data: question, error: questionError } = await supabase
       .from("question")
-      .select("id, public_access")
+      .select("id, public_access, find_number, kpk_mode, fpb_mode")
       .eq("uuid", normalizedUuid)
       .maybeSingle()
 
@@ -118,7 +120,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const supabase = createAdminClient()
     const { data: question, error: questionError } = await supabase
       .from("question")
-      .select("id, public_access")
+      .select("id, public_access, find_number, kpk_mode, fpb_mode")
       .eq("uuid", normalizedUuid)
       .maybeSingle()
 
@@ -132,7 +134,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const { data: participant, error: participantError } = await supabase
       .from("question_participant")
-      .select("id, finish")
+      .select("id, start, finish")
       .eq("id", participantId)
       .eq("question_id", question.id)
       .maybeSingle()
@@ -146,17 +148,26 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     if (action === "start") {
-      const { data: questionWithNumbers, error: findNumberError } = await supabase
-        .from("question")
-        .select("find_number")
-        .eq("id", question.id)
-        .single()
-
-      if (findNumberError) {
-        return jsonError(findNumberError.message, 500)
+      if (!question.kpk_mode && !question.fpb_mode) {
+        return jsonError("Konfigurasi mode soal belum valid.", 400)
       }
 
-      const expectedNumbers = normalizeFindNumber(questionWithNumbers.find_number)
+      const submittedKpkMode = body.kpkMode === true
+      const submittedFpbMode = body.fpbMode === true
+
+      if (!submittedKpkMode && !submittedFpbMode) {
+        return jsonError("Pilih minimal satu mode (KPK atau FPB).", 400)
+      }
+
+      const isModeMatched =
+        submittedKpkMode === question.kpk_mode &&
+        submittedFpbMode === question.fpb_mode
+
+      if (!isModeMatched) {
+        return jsonError("Mode yang dipilih belum sesuai dengan soal.", 400)
+      }
+
+      const expectedNumbers = normalizeFindNumber(question.find_number)
       if (expectedNumbers.length < 2) {
         return jsonError("Data angka soal belum valid.", 400)
       }

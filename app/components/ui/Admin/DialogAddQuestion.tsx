@@ -35,6 +35,7 @@ export function DialogAddQuestion() {
     const [findNumber, setFindNumber] = useState<number[]>([0, 0])
     const [publicAccess, setPublicAccess] = useState(true)
     const [assistant3d, setAssistant3d] = useState(true)
+    const [materialFile, setMaterialFile] = useState<File | null>(null)
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
     const [clearFileSignal, setClearFileSignal] = useState(0)
 
@@ -46,6 +47,7 @@ export function DialogAddQuestion() {
       setFindNumber([0, 0])
       setPublicAccess(true)
       setAssistant3d(true)
+      setMaterialFile(null)
       setThumbnailFile(null)
       setClearFileSignal((prev) => prev + 1)
     }
@@ -66,6 +68,10 @@ export function DialogAddQuestion() {
         formData.append("findNumber", JSON.stringify(findNumber))
         formData.append("publicAccess", String(publicAccess))
         formData.append("assistant3d", String(assistant3d))
+
+        if (materialFile) {
+          formData.append("material", materialFile)
+        }
 
         if (thumbnailFile) {
           formData.append("thumbnail", thumbnailFile)
@@ -143,7 +149,8 @@ export function DialogAddQuestion() {
                         type="file"
                         placeholder="Masukkan materi soal"
                         description="Materi akan muncul ketika soal dibuka."
-                        onFileChange={setThumbnailFile}
+                        onFileChange={setMaterialFile}
+                        fileKind="pdf"
                     />
                     <InputAdmin
                         key={`thumbnail-${clearFileSignal}`}
@@ -153,6 +160,7 @@ export function DialogAddQuestion() {
                         placeholder="Masukkan thumbnail soal"
                         description="Thumbnail akan muncul ketika soal dibuka."
                         onFileChange={setThumbnailFile}
+                        fileKind="image"
                     />
                     <AdditionalSettingsAdmin
                       publicAccess={publicAccess}

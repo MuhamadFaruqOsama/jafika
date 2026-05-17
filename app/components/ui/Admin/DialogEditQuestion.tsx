@@ -23,6 +23,7 @@ type EditQuestionPayload = {
   uuid: string
   title: string
   description: string
+  material: string | null
   kpk_mode: boolean
   fpb_mode: boolean
   find_number: unknown
@@ -67,6 +68,7 @@ export function DialogEditQuestion({
   const [findNumber, setFindNumber] = useState<number[]>([0, 0])
   const [publicAccess, setPublicAccess] = useState(true)
   const [assistant3d, setAssistant3d] = useState(true)
+  const [materialFile, setMaterialFile] = useState<File | null>(null)
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [clearFileSignal, setClearFileSignal] = useState(0)
 
@@ -80,6 +82,7 @@ export function DialogEditQuestion({
     setFindNumber(normalizeFindNumber(question.find_number))
     setPublicAccess(question.public_access)
     setAssistant3d(question.assistant_3d)
+    setMaterialFile(null)
     setThumbnailFile(null)
     setClearFileSignal((prev) => prev + 1)
   }, [open, question])
@@ -100,6 +103,10 @@ export function DialogEditQuestion({
       formData.append("findNumber", JSON.stringify(findNumber))
       formData.append("publicAccess", String(publicAccess))
       formData.append("assistant3d", String(assistant3d))
+
+      if (materialFile) {
+        formData.append("material", materialFile)
+      }
 
       if (thumbnailFile) {
         formData.append("thumbnail", thumbnailFile)
@@ -162,6 +169,20 @@ export function DialogEditQuestion({
           />
           <InputCorrectNumber values={findNumber} onValuesChange={setFindNumber} />
           <InputAdmin
+            key={`edit-material-${clearFileSignal}`}
+            label="Ganti Materi PDF (Opsional)"
+            id="edit-material"
+            type="file"
+            placeholder="Pilih materi baru"
+            description={
+              question.material
+                ? "Jika tidak dipilih, materi lama akan tetap digunakan."
+                : "Unggah materi PDF jika diperlukan."
+            }
+            onFileChange={setMaterialFile}
+            fileKind="pdf"
+          />
+          <InputAdmin
             key={`edit-thumbnail-${clearFileSignal}`}
             label="Ganti Thumbnail (Opsional)"
             id="edit-thumbnail"
@@ -169,6 +190,7 @@ export function DialogEditQuestion({
             placeholder="Pilih thumbnail baru"
             description="Jika tidak dipilih, thumbnail lama akan tetap digunakan."
             onFileChange={setThumbnailFile}
+            fileKind="image"
           />
           <AdditionalSettingsAdmin
             publicAccess={publicAccess}

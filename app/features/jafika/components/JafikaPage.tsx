@@ -27,8 +27,8 @@ export type JafikaShareConfig = {
   sessionStorageKey: string;
   title: string;
   description: string;
+  material: string | null;
   thumbnail: string | null;
-  expectedInputCount: number;
   kpkMode: boolean;
   fpbMode: boolean;
   assistant3dEnabled: boolean;
@@ -40,19 +40,16 @@ type JafikaPageProps = {
 
 export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const isShareMode = shareConfig?.enabled === true;
-  const expectedInputCount = isShareMode ? shareConfig.expectedInputCount : 0;
-  const hasLockedInputCount = isShareMode && expectedInputCount >= 2;
   const isFpbModeEnabled = isShareMode ? shareConfig.fpbMode : true;
   const isKpkModeEnabled = isShareMode ? shareConfig.kpkMode : true;
   const showAiAssistantSetting = !(isShareMode && shareConfig?.assistant3dEnabled === false);
+  const [selectedKpkMode, setSelectedKpkMode] = useState(false);
+  const [selectedFpbMode, setSelectedFpbMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showStartOverlay, setShowStartOverlay] = useState(false);
   const [showFinishOverlay, setShowFinishOverlay] = useState(false);
   const [isShareStarting, setIsShareStarting] = useState(false);
-  const game = useFpbGame({
-    initialInputCount: hasLockedInputCount ? expectedInputCount : undefined,
-    lockInputCount: hasLockedInputCount,
-  });
+  const game = useFpbGame();
   const backsoundRef = useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
   const distributionSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -75,8 +72,8 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const previewNumbers = game.numberInputs
     .map((value) => Number.parseInt(value, 10))
     .filter((value) => Number.isInteger(value) && value > 0);
-  const shouldAskFpb = isFpbModeEnabled;
-  const shouldAskKpk = isKpkModeEnabled;
+  const shouldAskFpb = isShareMode ? selectedFpbMode : isFpbModeEnabled;
+  const shouldAskKpk = isShareMode ? selectedKpkMode : isKpkModeEnabled;
   const fpbCompleted = !shouldAskFpb || game.showExplanation;
   const kpkCompleted = !shouldAskKpk || game.showKpkExplanation;
   const isShareCompleted =
@@ -278,9 +275,16 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const handleStartDistribution = async () => {
     if (isShareMode && shareConfig) {
       const parsedNumbers = game.numberInputs.map((value) => Number.parseInt(value, 10));
-      const isValid = parsedNumbers.every((value) => Number.isInteger(value) && value > 0);
+      const isValid =
+        parsedNumbers.length >= 2 &&
+        parsedNumbers.every((value) => Number.isInteger(value) && value > 0);
 
-      if (!isValid || parsedNumbers.length !== expectedInputCount) {
+      if (!selectedKpkMode && !selectedFpbMode) {
+        toast.error("Pilih minimal satu mode (KPK atau FPB) sebelum mulai.");
+        return;
+      }
+
+      if (!isValid) {
         toast.error("Isi semua bilangan dengan benar dulu sebelum mulai.");
         return;
       }
@@ -296,6 +300,8 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
             action: "start",
             participantId: shareConfig.participantId,
             numbers: parsedNumbers,
+            kpkMode: selectedKpkMode,
+            fpbMode: selectedFpbMode,
           }),
         });
 
@@ -421,7 +427,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                         </div>
                       )}
                     </div>
-                    <MaterialDownload/>
+                    <MaterialDownload materialPath={shareConfig.material} />
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
@@ -455,7 +461,12 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                         <FieldLabel>
                           <Field orientation="horizontal">
-                            <Checkbox id="kpk" name="kpk" />
+                            <Checkbox
+                              id="kpk"
+                              name="kpk"
+                              checked={selectedKpkMode}
+                              onCheckedChange={(checked) => setSelectedKpkMode(checked === true)}
+                            />
                             <FieldContent>
                               <FieldTitle>KPK</FieldTitle>
                               <FieldDescription>
@@ -466,7 +477,12 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                         </FieldLabel>
                         <FieldLabel>
                           <Field orientation="horizontal">
-                            <Checkbox id="fpb" name="fpb" />
+                            <Checkbox
+                              id="fpb"
+                              name="fpb"
+                              checked={selectedFpbMode}
+                              onCheckedChange={(checked) => setSelectedFpbMode(checked === true)}
+                            />
                             <FieldContent>
                               <FieldTitle>FPB</FieldTitle>
                               <FieldDescription>

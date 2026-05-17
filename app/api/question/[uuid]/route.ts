@@ -28,6 +28,10 @@ function sanitizeBaseName(name: string) {
     .replace(/^-|-$/g, "")
 }
 
+function isPdfFile(file: File) {
+  return file.type === "application/pdf" || extname(file.name).toLowerCase() === ".pdf"
+}
+
 export async function DELETE(_: Request, context: RouteContext) {
   try {
     const { uuid } = await context.params
@@ -90,6 +94,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const fpbMode = toBoolean(formData.get("fpbMode"), true)
     const publicAccess = toBoolean(formData.get("publicAccess"), true)
     const assistant3d = toBoolean(formData.get("assistant3d"), true)
+    const materialFile = formData.get("material")
     const thumbnailFile = formData.get("thumbnail")
 
     let parsedFindNumber: unknown = []
@@ -139,7 +144,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const { data: currentQuestion, error: currentQuestionError } = await supabase
       .from("question")
-      .select("id, thumbnail")
+      .select("id, material, thumbnail")
       .eq("uuid", normalizedUuid)
       .maybeSingle()
 
@@ -149,6 +154,24 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     if (!currentQuestion) {
       return jsonError("Soal tidak ditemukan.", 404)
+    }
+
+    let material = currentQuestion.material as string | null
+    if (materialFile instanceof File && materialFile.size > 0) {
+      if (!isPdfFile(materialFile)) {
+        return jsonError("Materi harus berformat PDF.")
+      }
+
+      const safeBaseName = sanitizeBaseName(materialFile.name) || "material"
+      const uniqueFileName = `${Date.now()}-${safeBaseName}-${randomUUID()}.pdf`
+      const uploadDir = join(process.cwd(), "public", "material")
+      const uploadPath = join(uploadDir, uniqueFileName)
+
+      await mkdir(uploadDir, { recursive: true })
+      const bytes = await materialFile.arrayBuffer()
+      await writeFile(uploadPath, Buffer.from(bytes))
+
+      material = `/material/${uniqueFileName}`
     }
 
     let thumbnail = currentQuestion.thumbnail as string | null
@@ -180,6 +203,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         kpk_mode: kpkMode,
         fpb_mode: fpbMode,
         find_number: normalizedFindNumber,
+        material,
         thumbnail,
         public_access: publicAccess,
         "3d_assistant": assistant3d,

@@ -22,6 +22,10 @@ function sanitizeBaseName(name: string) {
     .replace(/^-|-$/g, "")
 }
 
+function isPdfFile(file: File) {
+  return file.type === "application/pdf" || extname(file.name).toLowerCase() === ".pdf"
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
@@ -31,6 +35,7 @@ export async function POST(request: Request) {
     const fpbMode = toBoolean(formData.get("fpbMode"), true)
     const publicAccess = toBoolean(formData.get("publicAccess"), true)
     const assistant3d = toBoolean(formData.get("assistant3d"), true)
+    const materialFile = formData.get("material")
     const thumbnailFile = formData.get("thumbnail")
 
     let parsedFindNumber: unknown = []
@@ -64,6 +69,25 @@ export async function POST(request: Request) {
 
     if (normalizedFindNumber.length < 2) {
       return jsonError("Bilangan yang dicari tidak valid.")
+    }
+
+    let material: string | null = null
+    if (materialFile instanceof File && materialFile.size > 0) {
+      if (!isPdfFile(materialFile)) {
+        return jsonError("Materi harus berformat PDF.")
+      }
+
+      const safeBaseName = sanitizeBaseName(materialFile.name) || "material"
+      const uniqueFileName = `${Date.now()}-${safeBaseName}-${randomUUID()}.pdf`
+
+      const uploadDir = join(process.cwd(), "public", "material")
+      const uploadPath = join(uploadDir, uniqueFileName)
+
+      await mkdir(uploadDir, { recursive: true })
+      const bytes = await materialFile.arrayBuffer()
+      await writeFile(uploadPath, Buffer.from(bytes))
+
+      material = `/material/${uniqueFileName}`
     }
 
     let thumbnail: string | null = null
@@ -112,6 +136,7 @@ export async function POST(request: Request) {
         kpk_mode: kpkMode,
         fpb_mode: fpbMode,
         description,
+        material,
         find_number: normalizedFindNumber,
         thumbnail,
         public_access: publicAccess,
