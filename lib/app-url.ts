@@ -13,5 +13,5 @@ export function getAppBaseUrl() {
     return trimSlash(fromEnv.trim())
   }
 
-  return "http://localhost:3000"
+  return "https://jafika.vercel.app/"
 }
