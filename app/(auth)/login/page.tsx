@@ -48,7 +48,8 @@ export default function LoginPage() {
       }
 
       toast.success("Login berhasil.");
-      router.push("/studio");
+      router.replace("/studio");
+      router.refresh();
     } catch {
       toast.error("Terjadi kendala jaringan. Coba lagi.");
     } finally {

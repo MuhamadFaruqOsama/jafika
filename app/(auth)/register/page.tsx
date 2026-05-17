@@ -78,12 +78,13 @@ export default function RegisterPage() {
 
       if (signInError) {
         toast.error("Akun berhasil dibuat, tapi login otomatis gagal. Silakan login manual.");
-        router.push("/login");
+        router.replace("/login");
         return;
       }
 
       toast.success("Registrasi berhasil. Selamat datang!");
-      router.push("/studio");
+      router.replace("/studio");
+      router.refresh();
     } catch {
       toast.error("Terjadi kendala jaringan. Coba lagi.");
     } finally {

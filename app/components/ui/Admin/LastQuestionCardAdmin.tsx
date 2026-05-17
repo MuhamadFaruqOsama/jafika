@@ -38,6 +38,7 @@ export function LastQuestionCardAdmin({
             <div className="border-t border-gray-200 mt-4 pt-4">
                 <Link
                     href={latestQuestionHref}
+                    prefetch={false}
                     className="flex items-center justify-center gap-2 bg-blue-400 rounded-md py-2 text-white"
                 >
                     Pantau

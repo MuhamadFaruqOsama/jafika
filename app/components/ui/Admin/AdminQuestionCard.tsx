@@ -190,6 +190,7 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
             <div className="mt-5">
                 <Link
                     href={`/studio/soal/detail?uuid=${question.uuid}`}
+                    prefetch={false}
                     className="flex items-center justify-center gap-2 bg-pink-500 rounded-md py-2 text-white"
                 >
                     <HugeiconsIcon icon={Share05Icon} size={20}/>
