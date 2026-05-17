@@ -42,8 +42,8 @@ export function ParticipantRealtimeRefresher({
           table: "question_participant",
           ...(questionId ? { filter: `question_id=eq.${questionId}` } : {}),
         },
-        (payload) => {
-          const eventPayload = payload as unknown as ParticipantPayload
+        (payload: ParticipantPayload) => {
+          const eventPayload = payload
           if (!questionId) {
             const incomingQuestionId =
               eventPayload.new.question_id ?? eventPayload.old.question_id
