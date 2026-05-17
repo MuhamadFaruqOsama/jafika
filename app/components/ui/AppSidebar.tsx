@@ -17,17 +17,15 @@ type SidebarLink = {
   type: "regular"
 }
 
-const ADMIN_URL = (process.env.ADMIN_URL || "/studio").replace(/\/+$/, "") || "/studio"
-
 const SIDEBAR_LINKS: SidebarLink[] = [
   {
-    href: ADMIN_URL,
+    href: "/studio",
     label: "home",
     icon: <HugeiconsIcon icon={Home07Icon} />,
     type: "regular",
   },
   {
-    href: `${ADMIN_URL}/soal`,
+    href: "/studio/soal",
     label: "soal",
     icon: <HugeiconsIcon icon={BookBookmark02Icon} />,
     type: "regular",
