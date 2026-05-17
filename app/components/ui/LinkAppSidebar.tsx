@@ -35,6 +35,7 @@ export function LinkAppSidebar({ href, label, icon, type}: LinkAppSidebarProps) 
     return (
         <Link 
             href={href}
+            prefetch={false}
             className={`${baseClass} ${isActive ? activeClass : variantClass}`}
         >
             {icon}
