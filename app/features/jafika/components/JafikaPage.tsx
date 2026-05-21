@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { OBJECT_OPTIONS } from "@/app/features/jafika/lib/constants";
 import { useFpbGame } from "@/app/features/jafika/hooks/useFpbGame";
 import { DivisionStepCard } from "@/app/features/jafika/components/DivisionStepCard";
@@ -11,13 +12,27 @@ import { NumberInputList } from "@/app/features/jafika/components/NumberInputLis
 import { ObjectPickerModal } from "@/app/features/jafika/components/ObjectPickerModal";
 import { SettingsDrawer } from "@/app/features/jafika/components/SettingsDrawer";
 import { NumberPreviewBar } from "@/app/features/jafika/components/NumberPreviewBar";
-import { Toaster } from "@/components/ui/sonner";
 import Button from "@/app/components/ui/Button";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MaterialDownload } from "@/app/components/ui/MaterialDownload";
+
+const LazyJafikaThreeViewer = dynamic(
+  () =>
+    import("@/app/features/jafika/components/JafikaThreeViewer").then(
+      (module) => module.JafikaThreeViewer,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center text-sm text-gray-500">
+        Menyiapkan 3D...
+      </div>
+    ),
+  },
+);
 
 export type JafikaShareConfig = {
   enabled: true;
@@ -42,14 +57,17 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const isShareMode = shareConfig?.enabled === true;
   const isFpbModeEnabled = isShareMode ? shareConfig.fpbMode : true;
   const isKpkModeEnabled = isShareMode ? shareConfig.kpkMode : true;
-  const showAiAssistantSetting = !(isShareMode && shareConfig?.assistant3dEnabled === false);
+  const showAiAssistantSetting = !isShareMode;
+  const game = useFpbGame();
+  const is3dEnabled = isShareMode ? shareConfig?.assistant3dEnabled === true : game.isAssistant3dEnabled;
   const [selectedKpkMode, setSelectedKpkMode] = useState(false);
   const [selectedFpbMode, setSelectedFpbMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isThreeReady, setIsThreeReady] = useState(false);
+  const [hasShownThreeReadyToast, setHasShownThreeReadyToast] = useState(false);
   const [showStartOverlay, setShowStartOverlay] = useState(false);
   const [showFinishOverlay, setShowFinishOverlay] = useState(false);
   const [isShareStarting, setIsShareStarting] = useState(false);
-  const game = useFpbGame();
   const backsoundRef = useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
   const distributionSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -272,6 +290,29 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
     void markFinished();
   }, [isShareCompleted, shareConfig]);
 
+  useEffect(() => {
+    if (!is3dEnabled) {
+      setIsThreeReady(false);
+      setHasShownThreeReadyToast(false);
+      toast.dismiss("jafika-3d-loading");
+      return;
+    }
+
+    if (!isThreeReady) {
+      toast.loading("3D sedang disiapkan...", { id: "jafika-3d-loading" });
+    }
+  }, [is3dEnabled, isThreeReady]);
+
+  useEffect(() => {
+    if (!is3dEnabled || !isThreeReady) return;
+
+    toast.dismiss("jafika-3d-loading");
+    if (hasShownThreeReadyToast) return;
+
+    toast.success("3D siap ditampilkan.");
+    setHasShownThreeReadyToast(true);
+  }, [is3dEnabled, isThreeReady, hasShownThreeReadyToast]);
+
   const handleStartDistribution = async () => {
     if (isShareMode && shareConfig) {
       const parsedNumbers = game.numberInputs.map((value) => Number.parseInt(value, 10));
@@ -399,6 +440,28 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
       {game.hasStartedDistribution && !showStartOverlay && (
         <NumberPreviewBar numbers={previewNumbers} />
       )}
+
+      <div className="fixed bottom-0 right-2 z-80 flex flex-col items-end gap-2 md:right-10">
+        {/* {!isShareMode && (
+          <Button
+            variant="secondary"
+            data-sfx="none"
+            className="rounded-full px-4 py-1 text-sm font-semibold"
+            onClick={() => game.toggleAssistant3d(!game.isAssistant3dEnabled)}
+          >
+            {game.isAssistant3dEnabled ? "Sembunyikan 3D" : "Lihat 3D"}
+          </Button>
+        )} */}
+
+        {is3dEnabled && (
+          <div className="h-[50vh] aspect-3/4 max-h-140 min-h-70">
+            <LazyJafikaThreeViewer
+              onReady={() => setIsThreeReady(true)}
+              waveTriggerTick={game.minInputErrorTick}
+            />
+          </div>
+        )}
+      </div>
 
       <div className="flex w-full max-w-screen-2xl flex-col md:flex-row pb-80">
         <div
@@ -644,6 +707,8 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         backsoundEnabled={game.isBacksoundEnabled}
         onToggleBacksound={game.toggleBacksound}
         showAiAssistant={showAiAssistantSetting}
+        assistant3dEnabled={is3dEnabled}
+        onToggleAssistant3d={game.toggleAssistant3d}
       />
 
       <ObjectPickerModal
@@ -654,7 +719,6 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         onClose={() => game.setObjectModalOpen(false)}
       />
 
-      <Toaster position="bottom-right" richColors theme={game.themeMode} />
     </main>
   );
 }

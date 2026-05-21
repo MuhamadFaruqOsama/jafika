@@ -34,7 +34,7 @@ export default function RootLayout({
           <ThemeInitializer />
           {children}
         </ProgressBarProvider>
-        <Toaster />
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

@@ -21,13 +21,13 @@ export function Navbar({ onOpenSettings, hideLoginButton, hideAuthAction = false
   const shouldHideLogin = hideLoginButton ?? isAuthPage;
 
   return (
-    <nav className="relative flex max-h-[10vh] w-full items-center justify-center bg-pink-500 border-b border-gray-200">
+    <nav className="relative flex max-h-[10vh] w-full items-center justify-start md:justify-center bg-pink-500 border-b border-gray-200">
       <Image
         src="/icon/logo.png"
         alt="JAFIKA"
         width={250}
-        height={250}
-        className="-mb-14"
+        height={250}  
+        className="-mb-14 w-50 md:w-62.5"
       />
       <div className="absolute right-3 md:right-6">
         <div className="flex justify-end gap-3">

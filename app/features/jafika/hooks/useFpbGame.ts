@@ -15,6 +15,7 @@ const MIN_INPUT_COUNT = 2;
 const THEME_STORAGE_KEY = "jafika-theme";
 const BACKSOUND_STORAGE_KEY = "jafika-backsound-enabled";
 const SOUND_EFFECT_STORAGE_KEY = "jafika-sound-effect-enabled";
+const ASSISTANT_3D_STORAGE_KEY = "jafika-assistant-3d-enabled";
 type ThemeMode = "light" | "dark";
 
 type UseFpbGameOptions = {
@@ -60,6 +61,12 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     return saved === null ? true : saved === "true";
   };
 
+  const getInitialAssistant3dEnabled = () => {
+    if (typeof window === "undefined") return true;
+    const saved = window.localStorage.getItem(ASSISTANT_3D_STORAGE_KEY);
+    return saved === null ? true : saved === "true";
+  };
+
   const [numberInputs, setNumberInputs] = useState<string[]>(() =>
     createDefaultInputs(defaultInputCount),
   );
@@ -82,9 +89,11 @@ export function useFpbGame(options?: UseFpbGameOptions) {
   const [themeMode, setThemeMode] = useState<ThemeMode>(getInitialThemeMode);
   const [isBacksoundEnabled, setIsBacksoundEnabled] = useState(getInitialBacksoundEnabled);
   const [isSoundEffectEnabled, setIsSoundEffectEnabled] = useState(getInitialSoundEffectEnabled);
+  const [isAssistant3dEnabled, setIsAssistant3dEnabled] = useState(getInitialAssistant3dEnabled);
   const [distributionTick, setDistributionTick] = useState(0);
   const [correctTick, setCorrectTick] = useState(0);
   const [invalidTick, setInvalidTick] = useState(0);
+  const [minInputErrorTick, setMinInputErrorTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [objectModalOpen, setObjectModalOpen] = useState(false);
 
@@ -100,6 +109,10 @@ export function useFpbGame(options?: UseFpbGameOptions) {
   useEffect(() => {
     window.localStorage.setItem(SOUND_EFFECT_STORAGE_KEY, String(isSoundEffectEnabled));
   }, [isSoundEffectEnabled]);
+
+  useEffect(() => {
+    window.localStorage.setItem(ASSISTANT_3D_STORAGE_KEY, String(isAssistant3dEnabled));
+  }, [isAssistant3dEnabled]);
 
   const selectedImageUrl = useMemo(() => {
     return (
@@ -152,6 +165,10 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     setIsSoundEffectEnabled(isEnabled);
   }
 
+  function toggleAssistant3d(isEnabled: boolean) {
+    setIsAssistant3dEnabled(isEnabled);
+  }
+
   function parseNumberInputs(): number[] | null {
     const parsed = numberInputs.map((value) => Number.parseInt(value, 10));
     const isValid = parsed.every(
@@ -201,6 +218,7 @@ export function useFpbGame(options?: UseFpbGameOptions) {
 
     setNumberInputs((prev) => {
       if (prev.length <= MIN_INPUT_COUNT) {
+        setMinInputErrorTick((tick) => tick + 1);
         showError("Minimal jumlah bilangan adalah 2.");
         return prev;
       }
@@ -434,9 +452,11 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     showKpkExplanation,
     isBacksoundEnabled,
     isSoundEffectEnabled,
+    isAssistant3dEnabled,
     distributionTick,
     correctTick,
     invalidTick,
+    minInputErrorTick,
     themeMode,
     settingsOpen,
     setSettingsOpen,
@@ -446,6 +466,7 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     toggleDarkMode,
     toggleBacksound,
     toggleSoundEffect,
+    toggleAssistant3d,
     setInputValue,
     addNumberInput,
     removeNumberInput,

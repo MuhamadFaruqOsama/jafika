@@ -11,6 +11,8 @@ type SettingsDrawerProps = {
   backsoundEnabled: boolean;
   onToggleBacksound: (enabled: boolean) => void;
   showAiAssistant?: boolean;
+  assistant3dEnabled?: boolean;
+  onToggleAssistant3d?: (enabled: boolean) => void;
 };
 
 type ToggleRowProps = {
@@ -65,6 +67,8 @@ export function SettingsDrawer({
   backsoundEnabled,
   onToggleBacksound,
   showAiAssistant = true,
+  assistant3dEnabled = true,
+  onToggleAssistant3d,
 }: SettingsDrawerProps) {
   return (
     <>
@@ -163,9 +167,11 @@ export function SettingsDrawer({
           />
           {showAiAssistant && (
             <ToggleRow
-              title="AI Assistant"
-              subtitle="Membantu dan menemani Anda dalam pembelajaran."
+              title="3D Assistant"
+              subtitle="Tampilkan model 3D pendamping belajar."
               iconClass="hgi hgi-stroke hgi-ai-network"
+              checked={assistant3dEnabled}
+              onCheckedChange={onToggleAssistant3d}
             />
           )}
           {/* <ToggleRow
