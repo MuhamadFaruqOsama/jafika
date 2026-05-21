@@ -1,32 +1,131 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Bounds, Environment, useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 type JafikaThreeViewerProps = {
   onReady?: () => void;
-  waveTriggerTick?: number;
+  animationTriggerTicks?: Partial<Record<AssistantAnimationKey, number>>;
 };
+
+type AssistantAnimationKey = "waving" | "clap" | "headShake" | "dance1";
 
 type StellaModelProps = {
   onReady?: () => void;
-  waveTriggerTick?: number;
+  animationTriggerTicks?: Partial<Record<AssistantAnimationKey, number>>;
 };
 
-function StellaModel({ onReady, waveTriggerTick = 0 }: StellaModelProps) {
+function normalizeClipName(name: string): string {
+  return name.toLowerCase().replace(/[\s_-]/g, "");
+}
+
+function findClipByAliases(names: string[], aliases: string[]): string | undefined {
+  if (names.length === 0) return undefined;
+
+  const normalizedAliases = aliases.map((alias) => normalizeClipName(alias));
+  return names.find((name) => {
+    const normalizedName = normalizeClipName(name);
+    return normalizedAliases.some((alias) => normalizedName.includes(alias));
+  });
+}
+
+function StellaModel({ onReady, animationTriggerTicks }: StellaModelProps) {
   const gltf = useGLTF("/3D/coba-3.glb");
   const { actions, names, mixer } = useAnimations(gltf.animations, gltf.scene);
   const activeActionRef = useRef<THREE.AnimationAction | null>(null);
+  const cleanupFinishedHandlerRef = useRef<(() => void) | null>(null);
 
   const stayClipName = useMemo(
-    () => names.find((name) => name.toLowerCase().includes("stay")) ?? names[0],
+    () => findClipByAliases(names, ["stay"]) ?? names[0],
     [names],
   );
   const wavingClipName = useMemo(
-    () => names.find((name) => name.toLowerCase().includes("waving")),
+    () => findClipByAliases(names, ["waving", "wave"]),
     [names],
+  );
+  const clapClipName = useMemo(
+    () => findClipByAliases(names, ["clap"]),
+    [names],
+  );
+  const headShakeClipName = useMemo(
+    () => findClipByAliases(names, ["headshake", "head_shake", "shake"]),
+    [names],
+  );
+  const danceClipName = useMemo(
+    () => findClipByAliases(names, ["dance1", "dance 1", "dance"]),
+    [names],
+  );
+
+  const playStay = useCallback(() => {
+    if (!stayClipName) return;
+
+    const stayAction = actions[stayClipName];
+    if (!stayAction) {
+      console.warn("[3D] stay action tidak tersedia untuk clip:", stayClipName);
+      return;
+    }
+
+    stayAction
+      .reset()
+      .setLoop(THREE.LoopRepeat, Infinity)
+      .fadeIn(0.2)
+      .setEffectiveTimeScale(1)
+      .setEffectiveWeight(1)
+      .play();
+    activeActionRef.current = stayAction;
+  }, [actions, stayClipName]);
+
+  const playOneShotThenStay = useCallback(
+    (clipName: string | undefined, triggerTick: number, debugName: string) => {
+      if (triggerTick <= 0 || !clipName || !stayClipName) return;
+
+      const transientAction = actions[clipName];
+      const stayAction = actions[stayClipName];
+      if (!transientAction || !stayAction) {
+        console.warn("[3D] action tidak siap:", {
+          debugName,
+          clipName,
+          stayClipName,
+          hasTransientAction: Boolean(transientAction),
+          hasStayAction: Boolean(stayAction),
+        });
+        return;
+      }
+
+      cleanupFinishedHandlerRef.current?.();
+
+      const handleFinished = (event: { type: string; action: THREE.AnimationAction }) => {
+        if (event.action !== transientAction) return;
+
+        mixer.removeEventListener("finished", handleFinished);
+        cleanupFinishedHandlerRef.current = null;
+        transientAction.fadeOut(0.2);
+        playStay();
+        console.log(`[3D] ${debugName} selesai, kembali ke stay:`, stayClipName);
+      };
+
+      cleanupFinishedHandlerRef.current = () => {
+        mixer.removeEventListener("finished", handleFinished);
+      };
+      mixer.addEventListener("finished", handleFinished);
+
+      if (activeActionRef.current && activeActionRef.current !== transientAction) {
+        activeActionRef.current.fadeOut(0.2);
+      }
+
+      transientAction
+        .reset()
+        .setLoop(THREE.LoopOnce, 1)
+        .fadeIn(0.2)
+        .setEffectiveTimeScale(1)
+        .setEffectiveWeight(1)
+        .play();
+      activeActionRef.current = transientAction;
+      console.log(`[3D] play ${debugName} animation:`, clipName, { triggerTick });
+    },
+    [actions, mixer, playStay, stayClipName],
   );
 
   useEffect(() => {
@@ -50,92 +149,47 @@ function StellaModel({ onReady, waveTriggerTick = 0 }: StellaModelProps) {
       return;
     }
 
-    const stayAction = actions[stayClipName];
-    if (!stayAction) {
-      console.warn("[3D] stay action tidak tersedia untuk clip:", stayClipName);
-      return;
-    }
-
     mixer.stopAllAction();
-    stayAction.setLoop(THREE.LoopRepeat, Infinity);
-    stayAction
-      .reset()
-      .fadeIn(0.2)
-      .setEffectiveTimeScale(1)
-      .setEffectiveWeight(1)
-      .play();
+    playStay();
+
+    const stayAction = actions[stayClipName];
     console.log("[3D] play default animation:", stayClipName, {
-      running: stayAction.isRunning(),
-      weight: stayAction.getEffectiveWeight(),
-      timeScale: stayAction.getEffectiveTimeScale(),
+      running: stayAction?.isRunning(),
+      weight: stayAction?.getEffectiveWeight(),
+      timeScale: stayAction?.getEffectiveTimeScale(),
     });
-    activeActionRef.current = stayAction;
 
     return () => {
-      stayAction.fadeOut(0.2);
+      cleanupFinishedHandlerRef.current?.();
+      cleanupFinishedHandlerRef.current = null;
+      stayAction?.fadeOut(0.2);
     };
-  }, [actions, mixer, names, stayClipName]);
+  }, [actions, mixer, names, playStay, stayClipName]);
 
   useEffect(() => {
-    if (waveTriggerTick <= 0 || !wavingClipName || !stayClipName) return;
+    playOneShotThenStay(wavingClipName, animationTriggerTicks?.waving ?? 0, "waving");
+  }, [animationTriggerTicks?.waving, playOneShotThenStay, wavingClipName]);
 
-    const wavingAction = actions[wavingClipName];
-    const stayAction = actions[stayClipName];
-    if (!wavingAction || !stayAction) {
-      console.warn("[3D] waving/stay action tidak siap:", {
-        wavingClipName,
-        stayClipName,
-        hasWavingAction: Boolean(wavingAction),
-        hasStayAction: Boolean(stayAction),
-      });
-      return;
-    }
+  useEffect(() => {
+    playOneShotThenStay(clapClipName, animationTriggerTicks?.clap ?? 0, "clap");
+  }, [animationTriggerTicks?.clap, clapClipName, playOneShotThenStay]);
 
-    const handleFinished = (event: { type: string; action: THREE.AnimationAction }) => {
-      if (event.action !== wavingAction) return;
+  useEffect(() => {
+    playOneShotThenStay(
+      headShakeClipName,
+      animationTriggerTicks?.headShake ?? 0,
+      "head shake",
+    );
+  }, [animationTriggerTicks?.headShake, headShakeClipName, playOneShotThenStay]);
 
-      mixer.removeEventListener("finished", handleFinished);
-      console.log("[3D] waving selesai, kembali ke stay:", stayClipName);
-      wavingAction.fadeOut(0.2);
-      stayAction
-        .reset()
-        .setLoop(THREE.LoopRepeat, Infinity)
-        .fadeIn(0.2)
-        .setEffectiveTimeScale(1)
-        .setEffectiveWeight(1)
-        .play();
-      console.log("[3D] play stay (after waving):", stayClipName, {
-        running: stayAction.isRunning(),
-      });
-      activeActionRef.current = stayAction;
-    };
-
-    mixer.addEventListener("finished", handleFinished);
-
-    if (activeActionRef.current && activeActionRef.current !== wavingAction) {
-      activeActionRef.current.fadeOut(0.2);
-    }
-
-    wavingAction.setLoop(THREE.LoopOnce, 1);
-    wavingAction
-      .reset()
-      .fadeIn(0.2)
-      .setEffectiveTimeScale(1)
-      .setEffectiveWeight(1)
-      .play();
-    console.log("[3D] play waving animation:", wavingClipName, {
-      triggerTick: waveTriggerTick,
-      running: wavingAction.isRunning(),
-    });
-    activeActionRef.current = wavingAction;
-
-    return () => mixer.removeEventListener("finished", handleFinished);
-  }, [actions, mixer, stayClipName, wavingClipName, waveTriggerTick]);
+  useEffect(() => {
+    playOneShotThenStay(danceClipName, animationTriggerTicks?.dance1 ?? 0, "dance 1");
+  }, [animationTriggerTicks?.dance1, danceClipName, playOneShotThenStay]);
 
   return <primitive object={gltf.scene} />;
 }
 
-export function JafikaThreeViewer({ onReady, waveTriggerTick }: JafikaThreeViewerProps) {
+export function JafikaThreeViewer({ onReady, animationTriggerTicks }: JafikaThreeViewerProps) {
   return (
     <div className="h-full w-full">
       <Canvas 
@@ -149,7 +203,7 @@ export function JafikaThreeViewer({ onReady, waveTriggerTick }: JafikaThreeViewe
         <directionalLight position={[2, 3, 2]} intensity={1.4} />
         <Suspense fallback={null}>
           <Bounds fit observe margin={1.15}>
-            <StellaModel onReady={onReady} waveTriggerTick={waveTriggerTick} />
+            <StellaModel onReady={onReady} animationTriggerTicks={animationTriggerTicks} />
           </Bounds>
           <Environment preset="city" />
         </Suspense>

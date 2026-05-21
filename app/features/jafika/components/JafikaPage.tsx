@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { OBJECT_OPTIONS } from "@/app/features/jafika/lib/constants";
 import { useFpbGame } from "@/app/features/jafika/hooks/useFpbGame";
@@ -53,6 +53,9 @@ type JafikaPageProps = {
   shareConfig?: JafikaShareConfig;
 };
 
+type AssistantAnimationKey = "waving" | "clap" | "headShake" | "dance1";
+type AssistantAnimationTicks = Record<AssistantAnimationKey, number>;
+
 export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const isShareMode = shareConfig?.enabled === true;
   const isFpbModeEnabled = isShareMode ? shareConfig.fpbMode : true;
@@ -83,6 +86,18 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const pendingClickTimeoutRef = useRef<number | null>(null);
   const hasPlayedFinishVoiceRef = useRef(false);
   const hasMarkedShareFinishRef = useRef(false);
+  const hasTriggeredShareEntryWaveRef = useRef(false);
+  const lastDistributionAnimationTickRef = useRef(0);
+  const lastInvalidAnimationTickRef = useRef(0);
+  const hasTriggeredWinDanceRef = useRef(false);
+  const pendingWaveOnReadyRef = useRef(is3dEnabled);
+  const prevIs3dEnabledRef = useRef(is3dEnabled);
+  const [assistantAnimationTicks, setAssistantAnimationTicks] = useState<AssistantAnimationTicks>({
+    waving: 0,
+    clap: 0,
+    headShake: 0,
+    dance1: 0,
+  });
   const labelNumbers = game.numberInputs.map((value, index) => {
     const parsed = Number.parseInt(value, 10);
     return Number.isInteger(parsed) ? parsed : index + 1;
@@ -94,11 +109,17 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const shouldAskKpk = isShareMode ? selectedKpkMode : isKpkModeEnabled;
   const fpbCompleted = !shouldAskFpb || game.showExplanation;
   const kpkCompleted = !shouldAskKpk || game.showKpkExplanation;
+  const isGameWon = game.isFinished && fpbCompleted && kpkCompleted;
   const isShareCompleted =
     isShareMode &&
-    game.isFinished &&
-    fpbCompleted &&
-    kpkCompleted;
+    isGameWon;
+
+  const triggerAssistantAnimation = useCallback((animation: AssistantAnimationKey) => {
+    setAssistantAnimationTicks((prev) => ({
+      ...prev,
+      [animation]: prev[animation] + 1,
+    }));
+  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -215,6 +236,42 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
       pendingClickTimeoutRef.current = null;
     }
   }, [game.invalidTick, game.isSoundEffectEnabled]);
+
+  useEffect(() => {
+    if (game.distributionTick <= lastDistributionAnimationTickRef.current) return;
+    lastDistributionAnimationTickRef.current = game.distributionTick;
+    triggerAssistantAnimation("clap");
+  }, [game.distributionTick, triggerAssistantAnimation]);
+
+  useEffect(() => {
+    if (game.invalidTick <= lastInvalidAnimationTickRef.current) return;
+    lastInvalidAnimationTickRef.current = game.invalidTick;
+    triggerAssistantAnimation("headShake");
+  }, [game.invalidTick, triggerAssistantAnimation]);
+
+  useEffect(() => {
+    if (!isGameWon) {
+      hasTriggeredWinDanceRef.current = false;
+      return;
+    }
+
+    if (hasTriggeredWinDanceRef.current) return;
+    hasTriggeredWinDanceRef.current = true;
+    triggerAssistantAnimation("dance1");
+  }, [isGameWon, triggerAssistantAnimation]);
+
+  useEffect(() => {
+    const was3dEnabled = prevIs3dEnabledRef.current;
+    if (!was3dEnabled && is3dEnabled) {
+      pendingWaveOnReadyRef.current = true;
+    }
+
+    prevIs3dEnabledRef.current = is3dEnabled;
+  }, [is3dEnabled]);
+
+  useEffect(() => {
+    hasTriggeredShareEntryWaveRef.current = false;
+  }, [shareConfig?.questionUuid]);
 
   useEffect(() => {
     const handleButtonClick = (event: MouseEvent) => {
@@ -366,6 +423,9 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
 
     const started = game.startDistribution();
     if (!started) return;
+    if (isShareMode) {
+      triggerAssistantAnimation("clap");
+    }
 
     if (game.isSoundEffectEnabled) {
       const startAudio = startSoundRef.current;
@@ -456,8 +516,25 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         {is3dEnabled && (
           <div className="h-[50vh] aspect-3/4 max-h-140 min-h-70">
             <LazyJafikaThreeViewer
-              onReady={() => setIsThreeReady(true)}
-              waveTriggerTick={game.minInputErrorTick}
+              onReady={() => {
+                setIsThreeReady(true);
+                let hasTriggeredWave = false;
+
+                if (pendingWaveOnReadyRef.current) {
+                  triggerAssistantAnimation("waving");
+                  pendingWaveOnReadyRef.current = false;
+                  hasTriggeredWave = true;
+                }
+
+                if (isShareMode && !hasTriggeredShareEntryWaveRef.current && !hasTriggeredWave) {
+                  triggerAssistantAnimation("waving");
+                }
+
+                if (isShareMode) {
+                  hasTriggeredShareEntryWaveRef.current = true;
+                }
+              }}
+              animationTriggerTicks={assistantAnimationTicks}
             />
           </div>
         )}
