@@ -1,13 +1,14 @@
 import { AdminTable } from "@/app/components/ui/Admin/AdminTable";
 import { ParticipantRealtimeRefresher } from "@/app/components/ui/Admin/ParticipantRealtimeRefresher";
 import { QRGenerator } from "@/app/components/ui/Admin/QRGenerator";
-import { CheckmarkCircle03Icon, Globe02Icon, GlobeXIcon, UserIcon } from "@hugeicons/core-free-icons";
+import { Globe02Icon, GlobeXIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/server";
 import { MaterialDownload } from "@/app/components/ui/MaterialDownload";
+import { QuestionSecretPreview } from "./QuestionSecretPreview";
 
 type DetailPageProps = {
   searchParams: Promise<{
@@ -154,48 +155,11 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
                               </div>
                             </div>
                           </div>
-                          <div className="space-y-0">
-                            <div className="text-sm text-gray-500">tipe soal</div>
-                            <div className="text-base font-medium">
-                              <div className="flex justify-start gap-1 text-sm font-semibold">
-                              {
-                                question.kpk_mode && (
-                                  <div className="px-2 py-0.5 rounded-md bg-pink-400 text-white flex items-center gap-1">
-                                    <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
-                                    KPK
-                                  </div>
-                                )
-                              }
-                              {
-                                question.fpb_mode && (
-                                  <div className="px-2 py-0.5 rounded-md bg-orange-400 text-white flex items-center gap-1">
-                                    <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
-                                    FPB
-                                  </div>
-                                )
-                              }
-                            </div>
-                            </div>
-                          </div>
-                          <div className="space-y-0">
-                            <div className="text-sm text-gray-500">angka yang dicari</div>
-                            <div className="text-base font-medium">
-                              {findNumbers.length === 0 ? (
-                                <span>-</span>
-                              ) : (
-                                <div className="flex flex-wrap gap-1">
-                                  {findNumbers.map((value, index) => (
-                                    <span
-                                      key={`${value}-${index}`}
-                                      className="rounded-md bg-pink-100 px-2 py-0.5 text-sm text-pink-700"
-                                    >
-                                      {value}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                          <QuestionSecretPreview
+                            kpkMode={question.kpk_mode}
+                            fpbMode={question.fpb_mode}
+                            findNumbers={findNumbers}
+                          />
                         </div>
                       </div>
                     </div>
