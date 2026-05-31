@@ -119,7 +119,7 @@ export function ParticipantRealtimeTable({
           })
         },
       )
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           console.warn("Participant realtime channel issue:", status)
         }
