@@ -501,7 +501,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         <NumberPreviewBar numbers={previewNumbers} />
       )}
 
-      <div className="fixed bottom-0 right-2 z-80 flex flex-col items-end gap-2 md:right-10">
+      <div className="fixed -bottom-10 md:-bottom-12 -right-12 z-80 flex flex-col items-end gap-2 md:-right-10">
         {/* {!isShareMode && (
           <Button
             variant="secondary"
@@ -514,7 +514,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         )} */}
 
         {is3dEnabled && (
-          <div className="h-[50vh] aspect-3/4 max-h-140 min-h-70">
+          <div className="h-[50vh] md:h-[60vh] aspect-3/4 max-h-140 min-h-70">
             <LazyJafikaThreeViewer
               onReady={() => {
                 setIsThreeReady(true);

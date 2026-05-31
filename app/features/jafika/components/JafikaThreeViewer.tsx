@@ -32,7 +32,7 @@ function findClipByAliases(names: string[], aliases: string[]): string | undefin
 }
 
 function StellaModel({ onReady, animationTriggerTicks }: StellaModelProps) {
-  const gltf = useGLTF("/3D/coba-3.glb");
+  const gltf = useGLTF("/3D/3d-assistant-2.glb");
   const { actions, names, mixer } = useAnimations(gltf.animations, gltf.scene);
   const activeActionRef = useRef<THREE.AnimationAction | null>(null);
   const cleanupFinishedHandlerRef = useRef<(() => void) | null>(null);
@@ -212,4 +212,4 @@ export function JafikaThreeViewer({ onReady, animationTriggerTicks }: JafikaThre
   );
 }
 
-useGLTF.preload("/3D/coba-3.glb");
+useGLTF.preload("/3D/3d-assistant-2.glb");

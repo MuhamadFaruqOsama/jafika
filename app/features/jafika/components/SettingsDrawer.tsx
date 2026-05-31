@@ -168,7 +168,7 @@ export function SettingsDrawer({
           {showAiAssistant && (
             <ToggleRow
               title="3D Assistant"
-              subtitle="Tampilkan model 3D pendamping belajar."
+              subtitle="Model 3D sebagai pendamping belajar."
               iconClass="hgi hgi-stroke hgi-ai-network"
               checked={assistant3dEnabled}
               onCheckedChange={onToggleAssistant3d}
