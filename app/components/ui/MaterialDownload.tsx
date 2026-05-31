@@ -44,7 +44,7 @@ export function MaterialDownload({ materialPath }: MaterialDownloadProps) {
                 <div className="text-black font-medium">
                     Klik untuk mendownload Materi
                 </div>
-                <div className="text-sm text-gray-500">{fileName}</div>
+                <div className="text-sm text-gray-500 line-clamp-2">{fileName}</div>
             </div>
         </a>
     )

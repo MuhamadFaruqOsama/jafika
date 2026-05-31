@@ -95,7 +95,7 @@ export function FactorSelectionCard({
           className="absolute -top-10 -left-3"
         />
       
-        <div className="mb-5 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white ms-40">
+        <div className="mb-5 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white mt-16 md:mt-0 md:ms-40">
           {promptTitle}
         </div>
 

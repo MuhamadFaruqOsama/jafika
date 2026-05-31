@@ -81,7 +81,7 @@ export async function POST(request: Request, context: RouteContext) {
       .insert({
         question_id: question.id,
         name,
-        start: null,
+        start: new Date().toISOString(),
         finish: null,
       })
       .select("id")

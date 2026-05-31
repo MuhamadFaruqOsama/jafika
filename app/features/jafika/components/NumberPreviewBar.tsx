@@ -51,11 +51,11 @@ export function NumberPreviewBar({ numbers }: NumberPreviewBarProps) {
         ref={barRef}
         className={`${
           isFloating
-            ? "fixed left-1/2 top-5 z-30 w-[calc(100%-1.5rem)] -translate-x-1/2"
+            ? "fixed left-1/2 top-5 w-full px-3 md:px-0 z-30 -translate-x-1/2"
             : "relative"
         }`}
       >
-        <div className="relative mx-auto w-fit">
+        <div className="relative mx-auto w-full md:w-[50%]">
           <button
             type="button"
             onClick={() => setIsStickyEnabled((prev) => !prev)}
@@ -65,14 +65,14 @@ export function NumberPreviewBar({ numbers }: NumberPreviewBarProps) {
           >
             <HugeiconsIcon icon={isStickyEnabled ? PinIcon : PinOffIcon} size={18} strokeWidth={2.5} />
           </button>
-          <div className="rounded-4xl border border-gray-200 bg-white/95 p-4 shadow-md backdrop-blur dark:border-pink-400/40 dark:bg-black/85">
-            <div className="flex flex-wrap items-center gap-4 md:text-sm">
+          <div className="rounded-4xl border border-gray-200 bg-white/95 p-2 shadow-md backdrop-blur dark:border-pink-400/40 dark:bg-black/85">
+            <div className="grid grid-cols-2 md:grid-cols-4 items-center gap-2 md:text-sm justify-items-center">
               {numbers.map((number, index) => (
                 <div
                   key={`${index}-${number}`}
-                  className="rounded-2xl text-sm md:text-base text-center border border-gray-200 bg-white px-5 py-2 text-gray-600 dark:border-pink-400/60 dark:bg-pink-900/20 dark:text-pink-200"
+                  className="rounded-2xl w-full text-sm md:text-base text-center border border-gray-200 bg-white px-5 py-2 text-gray-600 dark:border-pink-400/60 dark:bg-pink-900/20 dark:text-pink-200"
                 >
-                  Bilangan ke-{index + 1}
+                  <span className="text-sm">Bilangan ke-{index + 1}</span>
                   <div className="font-extrabold text-2xl md:text-4xl text-pink-500 mt-2">
                     {number}
                   </div>

@@ -501,7 +501,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         <NumberPreviewBar numbers={previewNumbers} />
       )}
 
-      <div className="fixed -bottom-10 md:-bottom-12 -right-12 z-80 flex flex-col items-end gap-2 md:-right-10">
+      <div className="fixed -bottom-10 md:-bottom-12 -left-12 z-80 flex flex-col items-end gap-2 md:-right-10">
         {/* {!isShareMode && (
           <Button
             variant="secondary"
@@ -514,7 +514,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         )} */}
 
         {is3dEnabled && (
-          <div className="h-[50vh] md:h-[60vh] aspect-3/4 max-h-140 min-h-70">
+          <div className="h-[40vh] md:h-[60vh] aspect-3/4 max-h-140 min-h-70">
             <LazyJafikaThreeViewer
               onReady={() => {
                 setIsThreeReady(true);
@@ -764,8 +764,8 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
           )}
 
           {game.isFinished && fpbCompleted && kpkCompleted && (
-            <div className="bg-green-100 text-green-900 text-lg py-2 text-center border border-green-200 rounded-xl mt-5">
-              Selamat, Anda telah menyelesaikan soal
+            <div className="bg-green-100 text-green-900 font-medium text-lg py-2 text-center border border-green-300 rounded-xl mt-5">
+              Selamat, Kamu telah berhasil menyelesaikan soal ini!
             </div>
           )}
         </div>
