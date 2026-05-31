@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-type ParticipantRow = {
+export type ParticipantRow = {
   id: number
   name: string
   questionTitle: string

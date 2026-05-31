@@ -1,5 +1,4 @@
-import { AdminTable } from "@/app/components/ui/Admin/AdminTable";
-import { ParticipantRealtimeRefresher } from "@/app/components/ui/Admin/ParticipantRealtimeRefresher";
+import { ParticipantRealtimeTable } from "@/app/components/ui/Admin/ParticipantRealtimeTable";
 import { QRGenerator } from "@/app/components/ui/Admin/QRGenerator";
 import { Globe02Icon, GlobeXIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -103,7 +102,6 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
 
     return (
         <div className="mt-5 pb-20">
-            <ParticipantRealtimeRefresher questionId={question.id} />
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
                 <div className="col-span-1 bg-white p-3 border border-gray-200 rounded-md lg:col-span-3">
                     <div className="bg-pink-400 text-white rounded-full py-1 px-5 w-fit font-medium text-sm mb-5">Detail Soal</div>
@@ -213,14 +211,16 @@ export default async function RootLayout({ searchParams }: DetailPageProps) {
 
                 </div>
                 
-                <AdminTable
-                  rows={participantRows.map((item) => ({
+                <ParticipantRealtimeTable
+                  initialRows={participantRows.map((item) => ({
                     id: item.id,
                     name: item.name,
                     start: item.start,
                     finish: item.finish,
                     questionTitle: question.title,
                   }))}
+                  questionId={question.id}
+                  questionTitle={question.title}
                 />
             </div>
         </div>

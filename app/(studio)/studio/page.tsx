@@ -1,8 +1,7 @@
 import { AdminHeader } from "../../components/ui/Admin/AdminHeader";
-import { AdminTable } from "../../components/ui/Admin/AdminTable";
+import { ParticipantRealtimeTable } from "../../components/ui/Admin/ParticipantRealtimeTable";
 import { LastQuestionCardAdmin } from "../../components/ui/Admin/LastQuestionCardAdmin";
 import { TotalQuestionCardAdmin } from "../../components/ui/Admin/TotalQuestionCardAdmin";
-import { ParticipantRealtimeRefresher } from "../../components/ui/Admin/ParticipantRealtimeRefresher";
 import { createClient } from "@/lib/server";
 
 type QuestionRow = {
@@ -61,6 +60,7 @@ export default async function Dashboard() {
 
     const participantRows: ParticipantRow[] = participants ?? [];
     const questionTitleById = new Map(questionList.map((question) => [question.id, question.title]));
+    const questionTitleLookup = Object.fromEntries(questionTitleById.entries());
     const latestQuestion = questionList[0];
 
     const { count: totalWorkedCount } = questionIdList.length > 0
@@ -80,21 +80,23 @@ export default async function Dashboard() {
     return (
         <>
             <AdminHeader title="Home" />
-            <ParticipantRealtimeRefresher questionIds={questionIdList} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div className="col-span-1 md:col-span-2 border bg-white border-gray-200 p-2 rounded-lg">
                     <div className="text-gray-900 my-3 text-lg font-medium flex items-center gap-3">
                         Pengguna yang Terakhir Mengerjakan Soal Anda
                     </div>
-                    <AdminTable
-                      rows={participantRows.map((participant) => ({
+                    <ParticipantRealtimeTable
+                      initialRows={participantRows.map((participant) => ({
                         id: participant.id,
                         name: participant.name,
                         start: participant.start,
                         finish: participant.finish,
                         questionTitle: questionTitleById.get(participant.question_id) ?? "-",
                       }))}
+                      questionIds={questionIdList}
+                      questionTitleById={questionTitleLookup}
+                      maxRows={15}
                     />
                 </div>
                 <div className="col-span-1 space-y-3">
