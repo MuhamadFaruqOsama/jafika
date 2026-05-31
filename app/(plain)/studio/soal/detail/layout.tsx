@@ -2,7 +2,7 @@
 
 import { ArrowLeftBigIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 
 export default function RootLayout({
     children,

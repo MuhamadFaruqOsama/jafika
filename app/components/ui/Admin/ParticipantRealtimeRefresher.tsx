@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "next-nprogress-bar"
 import { createClient } from "@/lib/client"
 
 type ParticipantRealtimeRefresherProps = {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from '@vercel/analytics/next';
 import { ThemeInitializer } from "@/app/components/ui/ThemeInitializer";
 import { ProgressBarProvider } from "@/app/components/ui/ProgressBarProvider";
 import { Geist } from "next/font/google";
@@ -35,6 +36,7 @@ export default function RootLayout({
           {children}
         </ProgressBarProvider>
         <Toaster position="bottom-right" />
+        <Analytics />
       </body>
     </html>
   );

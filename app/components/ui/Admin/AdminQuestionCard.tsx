@@ -21,7 +21,7 @@ import { CheckmarkCircle03Icon, Globe02Icon, GlobeXIcon, MoreVerticalSquare01Ico
 import { HugeiconsIcon } from "@hugeicons/react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter } from "next-nprogress-bar"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { DialogEditQuestion } from "./DialogEditQuestion"
