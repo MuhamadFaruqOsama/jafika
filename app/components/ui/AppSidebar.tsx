@@ -17,7 +17,7 @@ type SidebarLink = {
   type: "regular"
 }
 
-const SIDEBAR_LINKS: SidebarLink[] = [
+const SIDEBAR_LINKS: SidebarLink[] =  [
   {
     href: "/studio",
     label: "home",

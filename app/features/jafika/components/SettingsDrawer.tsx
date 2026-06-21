@@ -79,108 +79,112 @@ export function SettingsDrawer({
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="mb-5 pb-5 flex items-center justify-between border-b border-gray-500 dark:border-slate-600">
-          <h5
-            id="drawer-label"
-            className="inline-flex items-center gap-3 text-xl font-medium dark:text-gray-100"
-          >
-            <i className="hgi hgi-stroke hgi-settings-01" />
-            <span>
-              <span className="font-bold text-pink-500">JAFIKA</span> Settings
-            </span>
-          </h5>
-          <button
-            type="button"
-            className="flex items-center justify-center h-9 w-9 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
-            onClick={onClose}
-            aria-label="Close menu"
-          >
-            <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={3} />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <button
-            className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
-            type="button"
-            onClick={() => {
-              onReset();
-              onClose();
-            }}
-          >
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-100">
-                <i className="hgi hgi-stroke hgi-clock-04" />
-                Mulai Dari Awal
-              </div>
-              <small className="text-sm text-gray-500 dark:text-gray-400">
-                Reset semua bilangan dan langkah pembagian.
-              </small>
+        <div className="flex flex-col gap-2 justify-between min-h-screen">
+          <div className="">
+            <div className="mb-5 pb-5 flex items-center justify-between border-b border-gray-500 dark:border-slate-600">
+              <h5
+                id="drawer-label"
+                className="inline-flex items-center gap-3 text-xl font-medium dark:text-gray-100"
+              >
+                <i className="hgi hgi-stroke hgi-settings-01" />
+                <span>
+                  <span className="font-bold text-pink-500">JAFIKA</span> Settings
+                </span>
+              </h5>
+              <button
+                type="button"
+                className="flex items-center justify-center h-9 w-9 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
+                onClick={onClose}
+                aria-label="Close menu"
+              >
+                <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={3} />
+              </button>
             </div>
-          </button>
-
-          {/* <button
-            className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
-            type="button"
-            onClick={onClose}
-          >
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-100">
-                <i className="hgi hgi-stroke hgi-pencil-edit-02" />
-                Buat Soal
-              </div>
-              <small className="text-sm text-gray-500 dark:text-gray-400">
-                Buat custom soal Anda sendiri.
-              </small>
+            <div className="flex flex-col gap-3">
+              <button
+                className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
+                type="button"
+                onClick={() => {
+                  onReset();
+                  onClose();
+                }}
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-100">
+                    <i className="hgi hgi-stroke hgi-clock-04" />
+                    Mulai Dari Awal
+                  </div>
+                  <small className="text-sm text-gray-500 dark:text-gray-400">
+                    Reset semua bilangan dan langkah pembagian.
+                  </small>
+                </div>
+              </button>
+              {/* <button
+                className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
+                type="button"
+                onClick={onClose}
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-100">
+                    <i className="hgi hgi-stroke hgi-pencil-edit-02" />
+                    Buat Soal
+                  </div>
+                  <small className="text-sm text-gray-500 dark:text-gray-400">
+                    Buat custom soal Anda sendiri.
+                  </small>
+                </div>
+              </button> */}
+              <button
+                className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
+                type="button"
+                onClick={onOpenObjectModal}
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-100">
+                    <i className="hgi hgi-stroke hgi-apple-01" />
+                    Pilih Objek
+                  </div>
+                  <small className="text-sm text-gray-500 dark:text-gray-400">
+                    Pilih objek untuk memvisualisasikan pembagian.
+                  </small>
+                </div>
+              </button>
+              <ToggleRow
+                title="Efek Suara"
+                subtitle="Efek suara JAFIKA."
+                iconClass="hgi hgi-stroke hgi-music-note-03"
+                checked={soundEffectEnabled}
+                onCheckedChange={onToggleSoundEffect}
+              />
+              <ToggleRow
+                title="Backsound"
+                subtitle="Backsound musik relaksasi."
+                iconClass="hgi hgi-stroke hgi-music-note-03"
+                checked={backsoundEnabled}
+                onCheckedChange={onToggleBacksound}
+              />
+              {showAiAssistant && (
+                <ToggleRow
+                  title="3D Assistant"
+                  subtitle="Model 3D sebagai pendamping belajar."
+                  iconClass="hgi hgi-stroke hgi-ai-network"
+                  checked={assistant3dEnabled}
+                  onCheckedChange={onToggleAssistant3d}
+                />
+              )}
+              {/* <ToggleRow
+                title="Dark Mode"
+                subtitle="Simpan preferensi mode gelap di perangkat ini."
+                iconClass="hgi hgi-stroke hgi-moon-02"
+                checked={darkMode}
+                onCheckedChange={onToggleDarkMode}
+              /> */}
             </div>
-          </button> */}
-
-          <button
-            className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
-            type="button"
-            onClick={onOpenObjectModal}
-          >
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-100">
-                <i className="hgi hgi-stroke hgi-apple-01" />
-                Pilih Objek
-              </div>
-              <small className="text-sm text-gray-500 dark:text-gray-400">
-                Pilih objek untuk memvisualisasikan pembagian.
-              </small>
-            </div>
-          </button>
-
-          <ToggleRow
-            title="Efek Suara"
-            subtitle="Efek suara JAFIKA."
-            iconClass="hgi hgi-stroke hgi-music-note-03"
-            checked={soundEffectEnabled}
-            onCheckedChange={onToggleSoundEffect}
-          />
-          <ToggleRow
-            title="Backsound"
-            subtitle="Backsound musik relaksasi."
-            iconClass="hgi hgi-stroke hgi-music-note-03"
-            checked={backsoundEnabled}
-            onCheckedChange={onToggleBacksound}
-          />
-          {showAiAssistant && (
-            <ToggleRow
-              title="3D Assistant"
-              subtitle="Model 3D sebagai pendamping belajar."
-              iconClass="hgi hgi-stroke hgi-ai-network"
-              checked={assistant3dEnabled}
-              onCheckedChange={onToggleAssistant3d}
-            />
-          )}
-          {/* <ToggleRow
-            title="Dark Mode"
-            subtitle="Simpan preferensi mode gelap di perangkat ini."
-            iconClass="hgi hgi-stroke hgi-moon-02"
-            checked={darkMode}
-            onCheckedChange={onToggleDarkMode}
-          /> */}
+          </div>
+          <div className="mb-5 text-center text-sm text-gray-700 dark:text-gray-300">
+            <div className="">&copy; 2026 Alifah Fitria Nugraheni. All Rights Reserved.</div>
+            <div className="">NIM: 2301050083</div>
+          </div>
         </div>
       </div>
     </>
