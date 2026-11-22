@@ -17,9 +17,9 @@ type AuthFormCardProps = {
   description: string;
   submitLabel: string;
   fields: AuthField[];
-  footerText: string;
-  footerLinkText: string;
-  footerHref: string;
+  footerText?: string;
+  footerLinkText?: string;
+  footerHref?: string;
   onSubmit?: (values: Record<string, string>) => void | Promise<void>;
   submitDisabled?: boolean;
   values?: Record<string, string>;
@@ -89,12 +89,14 @@ export function AuthFormCard({
         </div>
       </form>
 
-      <p className="mt-10 text-center text-gray-500 dark:text-gray-300">
-        {footerText}{" "}
-        <Link href={footerHref} className="font-semibold text-pink-500 hover:underline">
-          {footerLinkText}
-        </Link>
-      </p>
+      {footerText && footerLinkText && footerHref && (
+        <p className="mt-10 text-center text-gray-500 dark:text-gray-300">
+          {footerText}{" "}
+          <Link href={footerHref} className="font-semibold text-pink-500 hover:underline">
+            {footerLinkText}
+          </Link>
+        </p>
+      )}
     </div>
   );
 }
