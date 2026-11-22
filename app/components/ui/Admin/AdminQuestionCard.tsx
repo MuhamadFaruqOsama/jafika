@@ -178,6 +178,14 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                       </div>
                     )
                   }
+                  {
+                    !question.kpk_mode && !question.fpb_mode && (
+                      <div className="px-2 py-0.5 rounded-md bg-purple-500 text-white flex items-center gap-1">
+                        <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15}/>
+                        Pemfaktoran
+                      </div>
+                    )
+                  }
                 </div>
                 <div className="font-medium text-lg line-clamp-1 mt-2">
                     {question.title}

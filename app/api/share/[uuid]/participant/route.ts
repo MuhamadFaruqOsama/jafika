@@ -148,45 +148,60 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     if (action === "start") {
-      if (!question.kpk_mode && !question.fpb_mode) {
-        return jsonError("Konfigurasi mode soal belum valid.", 400)
-      }
+      const isPemfaktoran = !question.kpk_mode && !question.fpb_mode
 
-      const submittedKpkMode = body.kpkMode === true
-      const submittedFpbMode = body.fpbMode === true
+      if (isPemfaktoran) {
+        const expectedNumbers = normalizeFindNumber(question.find_number)
+        if (expectedNumbers.length < 1) {
+          return jsonError("Data angka soal belum valid.", 400)
+        }
 
-      if (!submittedKpkMode && !submittedFpbMode) {
-        return jsonError("Pilih minimal satu mode (KPK atau FPB).", 400)
-      }
+        const submittedNumbers = Array.isArray(body.numbers)
+          ? body.numbers
+            .map((item) => Number(item))
+            .filter((item) => Number.isFinite(item) && item > 0)
+          : []
 
-      const isModeMatched =
-        submittedKpkMode === question.kpk_mode &&
-        submittedFpbMode === question.fpb_mode
+        if (submittedNumbers.length !== 1 || submittedNumbers[0] !== expectedNumbers[0]) {
+          return jsonError("Angka yang dimasukkan belum sesuai dengan soal.", 400)
+        }
+      } else {
+        const submittedKpkMode = body.kpkMode === true
+        const submittedFpbMode = body.fpbMode === true
 
-      if (!isModeMatched) {
-        return jsonError("Mode yang dipilih belum sesuai dengan soal.", 400)
-      }
+        if (!submittedKpkMode && !submittedFpbMode) {
+          return jsonError("Pilih minimal satu mode (KPK atau FPB).", 400)
+        }
 
-      const expectedNumbers = normalizeFindNumber(question.find_number)
-      if (expectedNumbers.length < 2) {
-        return jsonError("Data angka soal belum valid.", 400)
-      }
+        const isModeMatched =
+          submittedKpkMode === question.kpk_mode &&
+          submittedFpbMode === question.fpb_mode
 
-      const submittedNumbers = Array.isArray(body.numbers)
-        ? body.numbers
-          .map((item) => Number(item))
-          .filter((item) => Number.isFinite(item) && item > 0)
-        : []
+        if (!isModeMatched) {
+          return jsonError("Mode yang dipilih belum sesuai dengan soal.", 400)
+        }
 
-      const expectedSorted = [...expectedNumbers].sort((a, b) => a - b)
-      const submittedSorted = [...submittedNumbers].sort((a, b) => a - b)
-      const isSameLength = expectedSorted.length === submittedSorted.length
-      const isMatched =
-        isSameLength &&
-        expectedSorted.every((item, index) => item === submittedSorted[index])
+        const expectedNumbers = normalizeFindNumber(question.find_number)
+        if (expectedNumbers.length < 2) {
+          return jsonError("Data angka soal belum valid.", 400)
+        }
 
-      if (!isMatched) {
-        return jsonError("Angka yang dimasukkan belum sesuai dengan soal.", 400)
+        const submittedNumbers = Array.isArray(body.numbers)
+          ? body.numbers
+            .map((item) => Number(item))
+            .filter((item) => Number.isFinite(item) && item > 0)
+          : []
+
+        const expectedSorted = [...expectedNumbers].sort((a, b) => a - b)
+        const submittedSorted = [...submittedNumbers].sort((a, b) => a - b)
+        const isSameLength = expectedSorted.length === submittedSorted.length
+        const isMatched =
+          isSameLength &&
+          expectedSorted.every((item, index) => item === submittedSorted[index])
+
+        if (!isMatched) {
+          return jsonError("Angka yang dimasukkan belum sesuai dengan soal.", 400)
+        }
       }
 
       if (participant.start) {

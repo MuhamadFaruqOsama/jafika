@@ -46,6 +46,7 @@ export type JafikaShareConfig = {
   thumbnail: string | null;
   kpkMode: boolean;
   fpbMode: boolean;
+  findNumbers?: number[];
   assistant3dEnabled: boolean;
 };
 
@@ -58,10 +59,18 @@ type AssistantAnimationTicks = Record<AssistantAnimationKey, number>;
 
 export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const isShareMode = shareConfig?.enabled === true;
-  const isFpbModeEnabled = isShareMode ? shareConfig.fpbMode : true;
-  const isKpkModeEnabled = isShareMode ? shareConfig.kpkMode : true;
+  const isPemfaktoran = isShareMode && !shareConfig.kpkMode && !shareConfig.fpbMode;
+  const targetNumber = shareConfig?.findNumbers?.[0];
+  const isFpbModeEnabled = isShareMode ? (isPemfaktoran ? false : shareConfig.fpbMode) : true;
+  const isKpkModeEnabled = isShareMode ? (isPemfaktoran ? false : shareConfig.kpkMode) : true;
   const showAiAssistantSetting = !isShareMode;
-  const game = useFpbGame();
+  const game = useFpbGame({
+    initialInputCount: isPemfaktoran ? 1 : 2,
+    initialValues: isPemfaktoran && targetNumber ? [String(targetNumber)] : undefined,
+    minInputCount: isPemfaktoran ? 1 : 2,
+    lockInputCount: isPemfaktoran,
+    isPemfaktoran,
+  });
   const is3dEnabled = isShareMode ? shareConfig?.assistant3dEnabled === true : game.isAssistant3dEnabled;
   const [selectedKpkMode, setSelectedKpkMode] = useState(false);
   const [selectedFpbMode, setSelectedFpbMode] = useState(false);
@@ -86,6 +95,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const pendingClickTimeoutRef = useRef<number | null>(null);
   const hasPlayedFinishVoiceRef = useRef(false);
   const hasMarkedShareFinishRef = useRef(false);
+  const hasAutoStartedPemfaktoranRef = useRef(false);
   const hasTriggeredShareEntryWaveRef = useRef(false);
   const lastDistributionAnimationTickRef = useRef(0);
   const lastInvalidAnimationTickRef = useRef(0);
@@ -105,11 +115,11 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const previewNumbers = game.numberInputs
     .map((value) => Number.parseInt(value, 10))
     .filter((value) => Number.isInteger(value) && value > 0);
-  const shouldAskFpb = isShareMode ? selectedFpbMode : isFpbModeEnabled;
-  const shouldAskKpk = isShareMode ? selectedKpkMode : isKpkModeEnabled;
+  const shouldAskFpb = isShareMode ? (isPemfaktoran ? false : selectedFpbMode) : isFpbModeEnabled;
+  const shouldAskKpk = isShareMode ? (isPemfaktoran ? false : selectedKpkMode) : isKpkModeEnabled;
   const fpbCompleted = !shouldAskFpb || game.showExplanation;
   const kpkCompleted = !shouldAskKpk || game.showKpkExplanation;
-  const isGameWon = game.isFinished && fpbCompleted && kpkCompleted;
+  const isGameWon = isPemfaktoran ? game.isFinished : (game.isFinished && fpbCompleted && kpkCompleted);
   const isShareCompleted =
     isShareMode &&
     isGameWon;
@@ -138,6 +148,14 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
     if (hasPlayedFinishVoiceRef.current) return;
     hasPlayedFinishVoiceRef.current = true;
 
+    if (isPemfaktoran) {
+      if (game.isSoundEffectEnabled && correctSoundRef.current) {
+        correctSoundRef.current.currentTime = 0;
+        void correctSoundRef.current.play().catch(() => {});
+      }
+      return;
+    }
+
     if (game.isSoundEffectEnabled) {
       const voiceAudio = finishVoiceRef.current;
       if (voiceAudio) {
@@ -147,11 +165,15 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         });
       }
     }
-  }, [game.isFinished, game.isSoundEffectEnabled]);
+  }, [game.isFinished, game.isSoundEffectEnabled, isPemfaktoran]);
 
   useEffect(() => {
     if (!game.isFinished) {
       setShowFinishOverlay(false);
+      return;
+    }
+
+    if (isPemfaktoran) {
       return;
     }
 
@@ -161,7 +183,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
     }, 2000);
 
     return () => window.clearTimeout(timeout);
-  }, [game.isFinished]);
+  }, [game.isFinished, isPemfaktoran]);
 
   useEffect(() => {
     const audio = backsoundRef.current;
@@ -348,6 +370,57 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   }, [isShareCompleted, shareConfig]);
 
   useEffect(() => {
+    if (!isShareMode || !shareConfig || !isPemfaktoran) return;
+    const num = shareConfig.findNumbers?.[0];
+    if (!num || num <= 1) return;
+    if (hasAutoStartedPemfaktoranRef.current) return;
+    hasAutoStartedPemfaktoranRef.current = true;
+
+    const autoStart = async () => {
+      try {
+        await fetch(`/api/share/${shareConfig.questionUuid}/participant`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "start",
+            participantId: shareConfig.participantId,
+            numbers: [num],
+            kpkMode: false,
+            fpbMode: false,
+          }),
+        });
+      } catch {
+        // Abaikan jika network error / session sudah start sebelumnya
+      }
+
+      const started = game.startDistribution([num]);
+      if (!started) return;
+
+      triggerAssistantAnimation("clap");
+
+      if (game.isSoundEffectEnabled) {
+        if (startSoundRef.current) {
+          startSoundRef.current.currentTime = 0;
+          void startSoundRef.current.play().catch(() => {});
+        }
+        if (magicSoundRef.current) {
+          magicSoundRef.current.currentTime = 0;
+          void magicSoundRef.current.play().catch(() => {});
+        }
+      }
+
+      setShowStartOverlay(true);
+      window.setTimeout(() => {
+        setShowStartOverlay(false);
+      }, 2000);
+    };
+
+    void autoStart();
+  }, [isPemfaktoran, isShareMode, shareConfig, game, triggerAssistantAnimation]);
+
+  useEffect(() => {
     if (!is3dEnabled) {
       setIsThreeReady(false);
       setHasShownThreeReadyToast(false);
@@ -373,51 +446,97 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
   const handleStartDistribution = async () => {
     if (isShareMode && shareConfig) {
       const parsedNumbers = game.numberInputs.map((value) => Number.parseInt(value, 10));
-      const isValid =
-        parsedNumbers.length >= 2 &&
-        parsedNumbers.every((value) => Number.isInteger(value) && value > 0);
 
-      if (!selectedKpkMode && !selectedFpbMode) {
-        toast.error("Pilih minimal satu mode (KPK atau FPB) sebelum mulai.");
-        return;
-      }
+      if (isPemfaktoran) {
+        const isValid =
+          parsedNumbers.length === 1 &&
+          Number.isInteger(parsedNumbers[0]) &&
+          parsedNumbers[0] > 1;
 
-      if (!isValid) {
-        toast.error("Isi semua bilangan dengan benar dulu sebelum mulai.");
-        return;
-      }
-
-      setIsShareStarting(true);
-      try {
-        const response = await fetch(`/api/share/${shareConfig.questionUuid}/participant`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "start",
-            participantId: shareConfig.participantId,
-            numbers: parsedNumbers,
-            kpkMode: selectedKpkMode,
-            fpbMode: selectedFpbMode,
-          }),
-        });
-
-        if (!response.ok) {
-          const payload = (await response.json()) as { error?: string };
-          if (response.status === 404) {
-            window.localStorage.removeItem(shareConfig.sessionStorageKey);
-            window.location.reload();
-            return;
-          }
-          toast.error(payload.error ?? "Belum bisa memulai sesi.");
+        if (!isValid) {
+          toast.error("Masukkan 1 bilangan valid (lebih dari 1) sebelum mulai.");
           return;
         }
-      } catch {
-        toast.error("Terjadi kendala jaringan saat memulai sesi.");
-        return;
-      } finally {
-        setIsShareStarting(false);
+
+        setIsShareStarting(true);
+        try {
+          const response = await fetch(`/api/share/${shareConfig.questionUuid}/participant`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "start",
+              participantId: shareConfig.participantId,
+              numbers: parsedNumbers,
+              kpkMode: false,
+              fpbMode: false,
+            }),
+          });
+
+          if (!response.ok) {
+            const payload = (await response.json()) as { error?: string };
+            if (response.status === 404) {
+              window.localStorage.removeItem(shareConfig.sessionStorageKey);
+              window.location.reload();
+              return;
+            }
+            toast.error(payload.error ?? "Belum bisa memulai sesi.");
+            return;
+          }
+        } catch {
+          toast.error("Terjadi kendala jaringan saat memulai sesi.");
+          return;
+        } finally {
+          setIsShareStarting(false);
+        }
+      } else {
+        const isValid =
+          parsedNumbers.length >= 2 &&
+          parsedNumbers.every((value) => Number.isInteger(value) && value > 0);
+
+        if (!selectedKpkMode && !selectedFpbMode) {
+          toast.error("Pilih minimal satu mode (KPK atau FPB) sebelum mulai.");
+          return;
+        }
+
+        if (!isValid) {
+          toast.error("Isi semua bilangan dengan benar dulu sebelum mulai.");
+          return;
+        }
+
+        setIsShareStarting(true);
+        try {
+          const response = await fetch(`/api/share/${shareConfig.questionUuid}/participant`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "start",
+              participantId: shareConfig.participantId,
+              numbers: parsedNumbers,
+              kpkMode: selectedKpkMode,
+              fpbMode: selectedFpbMode,
+            }),
+          });
+
+          if (!response.ok) {
+            const payload = (await response.json()) as { error?: string };
+            if (response.status === 404) {
+              window.localStorage.removeItem(shareConfig.sessionStorageKey);
+              window.location.reload();
+              return;
+            }
+            toast.error(payload.error ?? "Belum bisa memulai sesi.");
+            return;
+          }
+        } catch {
+          toast.error("Terjadi kendala jaringan saat memulai sesi.");
+          return;
+        } finally {
+          setIsShareStarting(false);
+        }
       }
     }
 
@@ -581,17 +700,19 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
             </>
           )}
           
-          {(!game.hasStartedDistribution || showStartOverlay) && (
+          {(!game.hasStartedDistribution || showStartOverlay) && !isPemfaktoran && (
             <div className="">
               <div className="shadow-sm mb-2 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
                 {
-                  isShareMode && shareConfig ? 'Mari pecahkan masalah tersebut' : 'Masukkan bilangan dulu sebelum memulai yaa'
+                  isShareMode && shareConfig
+                    ? 'Mari pecahkan masalah tersebut'
+                    : 'Masukkan bilangan dulu sebelum memulai yaa'
                 }
               </div>
               <div className="bg-white border border-gray-200 shadow-sm px-4 py-6 rounded-4xl  dark:bg-black/40 dark:border-gray-800/50">
                 {/* menentukan apakah kpk atau fpb */}
                 {
-                  isShareMode && shareConfig && (
+                  isShareMode && shareConfig && !isPemfaktoran && (
                     <>
                       <div className="px-4 py-1 bg-pink-100 text-black rounded-full w-fit">
                         1. Tentuin jenis faktorisasinya dulu yaa
@@ -641,8 +762,8 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                   )
                 }
                 
-                {/* {!hasLockedInputCount && (
-                  <div className="flex justify-end gap-3 mb-10">
+                {!isPemfaktoran && (
+                  <div className="flex justify-end gap-3">
                     <Button variant="secondary" onClick={game.addNumberInput}>
                       Tambah Bilangan
                     </Button>
@@ -650,15 +771,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                       Hapus Bilangan
                     </Button>
                   </div>
-                )} */}
-                <div className="flex justify-end gap-3">
-                  <Button variant="secondary" onClick={game.addNumberInput}>
-                    Tambah Bilangan
-                  </Button>
-                  <Button variant="secondary" onClick={game.removeNumberInput}>
-                    Hapus Bilangan
-                  </Button>
-                </div>
+                )}
                 <NumberInputList
                   values={game.numberInputs}
                   locked={game.isNumbersLocked}
@@ -763,7 +876,28 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
             />
           )}
 
-          {game.isFinished && fpbCompleted && kpkCompleted && (
+          {isPemfaktoran && game.isFinished && (
+            <div className="mb-10 mt-3 bg-pink-100 px-4 py-5 rounded-3xl border border-pink-200 dark:bg-pink-950/30 dark:border-pink-800">
+              <div className="mb-3 rounded-full border border-yellow-500 bg-yellow-100 dark:bg-yellow-300/20 dark:text-white py-1.5 px-4 w-fit font-bold text-sm">
+                Hasil Faktorisasi Prima
+              </div>
+              <div className="text-gray-800 dark:text-white">
+                Faktorisasi prima dari <b>{game.originalNumbers[0]}</b> adalah:
+                <div className="mt-3 rounded-2xl border-2 border-green-500 bg-white p-4 text-center text-xl font-bold dark:bg-black dark:text-white">
+                  {game.factorOptions[0]?.map((factor, index) => (
+                    <span key={`${factor.prime}-${factor.exp}`}>
+                      {factor.prime}
+                      {factor.exp > 1 && <sup>{factor.exp}</sup>}
+                      {index < (game.factorOptions[0]?.length ?? 0) - 1 ? " x " : ""}
+                    </span>
+                  ))}{" "}
+                  = {game.originalNumbers[0]}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isGameWon && (
             <div className="bg-green-100 text-green-900 font-medium text-lg py-2 text-center border border-green-300 rounded-xl mt-5">
               Selamat, Kamu telah berhasil menyelesaikan soal ini!
             </div>

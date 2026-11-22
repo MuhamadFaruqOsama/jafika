@@ -10,22 +10,26 @@ import {
 type QuestionTypeAdminProps = {
   kpkMode: boolean
   fpbMode: boolean
+  pemfaktoranMode: boolean
   onKpkModeChange: (checked: boolean) => void
   onFpbModeChange: (checked: boolean) => void
+  onPemfaktoranModeChange: (checked: boolean) => void
 }
 
 export function QuestionTypeAdmin({
   kpkMode,
   fpbMode,
+  pemfaktoranMode,
   onKpkModeChange,
   onFpbModeChange,
+  onPemfaktoranModeChange,
 }: QuestionTypeAdminProps) {
   return (
     <Field>
         <FieldLabel htmlFor="question-type" className="text-base">
             Jenis Soal
         </FieldLabel>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-gray-200 p-2 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border border-gray-200 p-2 rounded-md">
             <FieldGroup>
               <Field orientation="horizontal">
                 <Checkbox
@@ -62,9 +66,27 @@ export function QuestionTypeAdmin({
                 </FieldContent>
               </Field>
             </FieldGroup>
+            <FieldGroup>
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="pemfaktoran-mode-checkbox"
+                  name="pemfaktoran-mode-checkbox"
+                  checked={pemfaktoranMode}
+                  onCheckedChange={(checked) => onPemfaktoranModeChange(checked === true)}
+                />
+                <FieldContent>
+                  <FieldLabel htmlFor="pemfaktoran-mode-checkbox">
+                    Pemfaktoran
+                  </FieldLabel>
+                  <FieldDescription>
+                    Faktorisasi prima 1 bilangan.
+                  </FieldDescription>
+                </FieldContent>
+              </Field>
+            </FieldGroup>
         </div>
         <FieldDescription>
-            Pilih jenis soal yang ingin Anda buat. Anda bisa memilih 1 jenis atau lebih.
+            Pilih jenis soal yang ingin Anda buat. Anda bisa memilih KPK, FPB, atau Pemfaktoran murni.
         </FieldDescription>
     </Field>
   )

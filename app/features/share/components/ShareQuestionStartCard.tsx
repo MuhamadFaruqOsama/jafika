@@ -15,6 +15,7 @@ type ShareQuestionStartCardProps = {
   thumbnail: string | null
   kpk_mode: boolean
   fpb_mode: boolean
+  find_numbers: number[]
   assistant3d: boolean
 }
 
@@ -33,6 +34,7 @@ export function ShareQuestionStartCard({
   thumbnail,
   kpk_mode,
   fpb_mode,
+  find_numbers,
   assistant3d,
 }: ShareQuestionStartCardProps) {
   const storageKey = useMemo(() => `jafika-share-session:${uuid}`, [uuid])
@@ -129,6 +131,7 @@ export function ShareQuestionStartCard({
           thumbnail,
           kpkMode: kpk_mode,
           fpbMode: fpb_mode,
+          findNumbers: find_numbers,
           assistant3dEnabled: assistant3d,
         }}
       />

@@ -20,7 +20,10 @@ type ThemeMode = "light" | "dark";
 
 type UseFpbGameOptions = {
   initialInputCount?: number;
+  initialValues?: string[];
+  minInputCount?: number;
   lockInputCount?: boolean;
+  isPemfaktoran?: boolean;
 };
 
 function createDefaultInputs(count = MIN_INPUT_COUNT): string[] {
@@ -36,9 +39,10 @@ export function buildSelectionKey(
 }
 
 export function useFpbGame(options?: UseFpbGameOptions) {
+  const minInputCount = options?.minInputCount ?? (options?.initialInputCount === 1 ? 1 : MIN_INPUT_COUNT);
   const defaultInputCount = Math.max(
-    MIN_INPUT_COUNT,
-    options?.initialInputCount ?? MIN_INPUT_COUNT,
+    minInputCount,
+    options?.initialInputCount ?? minInputCount,
   );
   const lockInputCount = options?.lockInputCount ?? false;
 
@@ -68,7 +72,9 @@ export function useFpbGame(options?: UseFpbGameOptions) {
   };
 
   const [numberInputs, setNumberInputs] = useState<string[]>(() =>
-    createDefaultInputs(defaultInputCount),
+    options?.initialValues && options.initialValues.length > 0
+      ? options.initialValues
+      : createDefaultInputs(defaultInputCount),
   );
   const [isNumbersLocked, setIsNumbersLocked] = useState(false);
   const [hasStartedDistribution, setHasStartedDistribution] = useState(false);
@@ -175,8 +181,12 @@ export function useFpbGame(options?: UseFpbGameOptions) {
       (value) => Number.isInteger(value) && value > 0,
     );
 
-    if (!isValid || parsed.length < MIN_INPUT_COUNT) {
-      showError("Isi semua bilangan terlebih dahulu (minimal 2).");
+    if (!isValid || parsed.length < minInputCount) {
+      showError(
+        minInputCount === 1
+          ? "Isi bilangan terlebih dahulu (minimal 2)."
+          : "Isi semua bilangan terlebih dahulu (minimal 2)."
+      );
       return null;
     }
 
@@ -217,9 +227,9 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     }
 
     setNumberInputs((prev) => {
-      if (prev.length <= MIN_INPUT_COUNT) {
+      if (prev.length <= minInputCount) {
         setMinInputErrorTick((tick) => tick + 1);
-        showError("Minimal jumlah bilangan adalah 2.");
+        showError(`Minimal jumlah bilangan adalah ${minInputCount}.`);
         return prev;
       }
 
@@ -227,11 +237,16 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     });
   }
 
-  function startDistribution() {
+  function startDistribution(customNumbers?: number[]) {
     if (hasStartedDistribution) return false;
 
-    const parsedNumbers = parseNumberInputs();
-    if (!parsedNumbers) return false;
+    let parsedNumbers = customNumbers;
+    if (!parsedNumbers) {
+      const parsed = parseNumberInputs();
+      if (!parsed) return false;
+      parsedNumbers = parsed;
+    }
+    if (parsedNumbers.length === 0) return false;
 
     setNumberInputs(parsedNumbers.map((number) => String(number)));
     setIsNumbersLocked(true);
@@ -333,7 +348,11 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     setDistributionTick((prev) => prev + 1);
 
     if (nextFinished.every(Boolean)) {
-      showSuccess("Selesai. Silakan pilih faktor untuk cek jawaban.");
+      showSuccess(
+        options?.isPemfaktoran
+          ? "Selesai memfaktorkan!"
+          : "Selesai. Silakan pilih faktor untuk cek jawaban."
+      );
     }
   }
 

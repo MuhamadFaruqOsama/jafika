@@ -46,20 +46,28 @@ export async function POST(request: Request) {
       return jsonError("Deskripsi soal wajib diisi.")
     }
 
-    if (!kpkMode && !fpbMode) {
-      return jsonError("Pilih minimal satu mode soal.")
-    }
+    const isPemfaktoran = !kpkMode && !fpbMode
 
-    if (findNumber.length < 2) {
-      return jsonError("Minimal isi dua bilangan untuk dicari.")
+    if (isPemfaktoran) {
+      if (findNumber.length < 1) {
+        return jsonError("Minimal isi satu bilangan untuk difaktorkan.")
+      }
+    } else {
+      if (findNumber.length < 2) {
+        return jsonError("Minimal isi dua bilangan untuk dicari.")
+      }
     }
 
     const normalizedFindNumber = findNumber
       .map((value) => Number(value))
-      .filter((value) => Number.isFinite(value))
+      .filter((value) => Number.isFinite(value) && value > 1)
 
-    if (normalizedFindNumber.length < 2) {
-      return jsonError("Bilangan yang dicari tidak valid.")
+    if (isPemfaktoran && normalizedFindNumber.length < 1) {
+      return jsonError("Bilangan yang akan difaktorkan harus lebih dari 1.")
+    }
+
+    if (!isPemfaktoran && normalizedFindNumber.length < 2) {
+      return jsonError("Bilangan yang dicari tidak valid (minimal 2 bilangan lebih dari 1).")
     }
 
     let material: string | null = null

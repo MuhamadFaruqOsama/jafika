@@ -49,9 +49,16 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound()
   }
 
+  const isPemfaktoran = !question.kpk_mode && !question.fpb_mode
   const normalizedCorrectNumbers = normalizeFindNumber(question.find_number)
-  if (normalizedCorrectNumbers.length < 2 || (!question.kpk_mode && !question.fpb_mode)) {
-    notFound()
+  if (isPemfaktoran) {
+    if (normalizedCorrectNumbers.length < 1) {
+      notFound()
+    }
+  } else {
+    if (normalizedCorrectNumbers.length < 2) {
+      notFound()
+    }
   }
 
   const creatorName = question.creator_name?.trim() || "Pengguna"
@@ -67,6 +74,7 @@ export default async function SharePage({ params }: SharePageProps) {
         thumbnail={question.thumbnail}
         kpk_mode={question.kpk_mode}
         fpb_mode={question.fpb_mode}
+        find_numbers={normalizedCorrectNumbers}
         assistant3d={question["3d_assistant"]}
       />
     </div>

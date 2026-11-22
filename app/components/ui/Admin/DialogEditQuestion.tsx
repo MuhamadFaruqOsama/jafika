@@ -43,12 +43,16 @@ type UpdateQuestionResponse = {
   message?: string
 }
 
-function normalizeFindNumber(value: unknown) {
-  if (!Array.isArray(value)) return [0, 0]
+function normalizeFindNumber(value: unknown, isPemfaktoran: boolean) {
+  if (!Array.isArray(value)) return isPemfaktoran ? [0] : [0, 0]
 
   const numbers = value
     .map((item) => Number(item))
     .filter((item) => Number.isFinite(item))
+
+  if (isPemfaktoran) {
+    return numbers.length >= 1 ? [numbers[0]] : [0]
+  }
 
   if (numbers.length < 2) return [0, 0]
   return numbers
@@ -65,6 +69,7 @@ export function DialogEditQuestion({
   const [description, setDescription] = useState("")
   const [kpkMode, setKpkMode] = useState(true)
   const [fpbMode, setFpbMode] = useState(true)
+  const [pemfaktoranMode, setPemfaktoranMode] = useState(false)
   const [findNumber, setFindNumber] = useState<number[]>([0, 0])
   const [publicAccess, setPublicAccess] = useState(true)
   const [assistant3d, setAssistant3d] = useState(true)
@@ -72,14 +77,48 @@ export function DialogEditQuestion({
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [clearFileSignal, setClearFileSignal] = useState(0)
 
+  const handleKpkChange = (checked: boolean) => {
+    setKpkMode(checked)
+    if (checked) {
+      setPemfaktoranMode(false)
+      if (findNumber.length < 2) {
+        setFindNumber([findNumber[0] ?? 0, 0])
+      }
+    }
+  }
+
+  const handleFpbChange = (checked: boolean) => {
+    setFpbMode(checked)
+    if (checked) {
+      setPemfaktoranMode(false)
+      if (findNumber.length < 2) {
+        setFindNumber([findNumber[0] ?? 0, 0])
+      }
+    }
+  }
+
+  const handlePemfaktoranChange = (checked: boolean) => {
+    setPemfaktoranMode(checked)
+    if (checked) {
+      setKpkMode(false)
+      setFpbMode(false)
+      setFindNumber([findNumber[0] ?? 0])
+    } else {
+      setKpkMode(true)
+      setFindNumber([findNumber[0] ?? 0, 0])
+    }
+  }
+
   useEffect(() => {
     if (!open) return
 
+    const isPem = !question.kpk_mode && !question.fpb_mode
     setTitle(question.title)
     setDescription(question.description)
     setKpkMode(question.kpk_mode)
     setFpbMode(question.fpb_mode)
-    setFindNumber(normalizeFindNumber(question.find_number))
+    setPemfaktoranMode(isPem)
+    setFindNumber(normalizeFindNumber(question.find_number, isPem))
     setPublicAccess(question.public_access)
     setAssistant3d(question.assistant_3d)
     setMaterialFile(null)
@@ -88,9 +127,21 @@ export function DialogEditQuestion({
   }, [open, question])
 
   const handleSubmit = async () => {
-    if (!kpkMode && !fpbMode) {
-      toast.error("Pilih minimal satu mode soal (KPK atau FPB).")
+    if (!kpkMode && !fpbMode && !pemfaktoranMode) {
+      toast.error("Pilih minimal satu mode soal (KPK, FPB, atau Pemfaktoran).")
       return
+    }
+
+    if (pemfaktoranMode) {
+      if (findNumber.length < 1 || !findNumber[0] || findNumber[0] <= 1) {
+        toast.error("Masukkan 1 bilangan yang valid (minimal lebih dari 1) untuk difaktorkan.")
+        return
+      }
+    } else {
+      if (findNumber.length < 2 || findNumber.some((n) => n <= 1)) {
+        toast.error("Minimal isi dua bilangan valid (lebih dari 1) untuk dicari.")
+        return
+      }
     }
 
     setIsSubmitting(true)
@@ -100,7 +151,7 @@ export function DialogEditQuestion({
       formData.append("description", description)
       formData.append("kpkMode", String(kpkMode))
       formData.append("fpbMode", String(fpbMode))
-      formData.append("findNumber", JSON.stringify(findNumber))
+      formData.append("findNumber", JSON.stringify(pemfaktoranMode ? [findNumber[0]] : findNumber))
       formData.append("publicAccess", String(publicAccess))
       formData.append("assistant3d", String(assistant3d))
 
@@ -156,8 +207,10 @@ export function DialogEditQuestion({
           <QuestionTypeAdmin
             kpkMode={kpkMode}
             fpbMode={fpbMode}
-            onKpkModeChange={setKpkMode}
-            onFpbModeChange={setFpbMode}
+            pemfaktoranMode={pemfaktoranMode}
+            onKpkModeChange={handleKpkChange}
+            onFpbModeChange={handleFpbChange}
+            onPemfaktoranModeChange={handlePemfaktoranChange}
           />
           <TextAreaAdmin
             label="Deskripsi"
@@ -167,7 +220,11 @@ export function DialogEditQuestion({
             value={description}
             onValueChange={setDescription}
           />
-          <InputCorrectNumber values={findNumber} onValuesChange={setFindNumber} />
+          <InputCorrectNumber
+            values={findNumber}
+            onValuesChange={setFindNumber}
+            isPemfaktoran={pemfaktoranMode}
+          />
           <InputAdmin
             key={`edit-material-${clearFileSignal}`}
             label="Ganti Materi PDF (Opsional)"

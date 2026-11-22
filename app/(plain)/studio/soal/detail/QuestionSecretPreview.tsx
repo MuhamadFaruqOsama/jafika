@@ -47,6 +47,12 @@ export function QuestionSecretPreview({
                   FPB
                 </div>
               )}
+              {!kpkMode && !fpbMode && (
+                <div className="flex items-center gap-1 rounded-md bg-purple-500 px-2 py-0.5 text-white">
+                  <HugeiconsIcon icon={CheckmarkCircle03Icon} size={15} />
+                  Pemfaktoran
+                </div>
+              )}
             </div>
           )}
         </div>
