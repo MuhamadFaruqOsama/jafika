@@ -35,10 +35,16 @@ function formatCreatedAtLabel(value: string) {
 
 export default async function Soal() {
     const supabase = await createClient();
-    const { data: questions } = await supabase
-      .from("question")
-      .select('id, uuid, title, description, material, kpk_mode, fpb_mode, find_number, thumbnail, public_access, "3d_assistant", created_at')
-      .order("created_at", { ascending: false });
+    const { data: authData } = await supabase.auth.getUser();
+    const authUserId = authData.user?.id;
+
+    const { data: questions } = authUserId
+      ? await supabase
+          .from("question")
+          .select('id, uuid, title, description, material, kpk_mode, fpb_mode, find_number, thumbnail, public_access, "3d_assistant", created_at')
+          .eq("user_id", authUserId)
+          .order("created_at", { ascending: false })
+      : { data: [] };
 
     const questionList: QuestionRow[] = (questions ?? []).map((question) => ({
       ...question,

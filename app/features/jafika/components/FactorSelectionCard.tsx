@@ -99,13 +99,15 @@ export function FactorSelectionCard({
           <div className="bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
             {promptTitle}
           </div>
-          {
+          <div className="bg-white px-2 md:px-6 py-1 mt-2 rounded-md md:rounded-full">
+            {
               variant === "KPK" ? (
-                <div className="font-normal text-sm px-6 text-gray-600 mt-1">Cara: Pilih faktorisasi terbesar</div>
+                <div className="font-normal text-sm text-gray-600 mt-1"><strong className="font-semibold text-black">Petunjuk:</strong> ambil semua faktor prima yang muncul, pilih pangkat terbesar untuk faktor yang sama, lalu kalikan semuanya.</div>
               ) : (
-                <div className="font-normal text-sm px-6 text-gray-600 mt-1">Cara: Pilih faktorisasi terkecil</div>
+                <div className="font-normal text-sm text-gray-600 mt-1"><strong className="font-semibold text-black">Petunjuk:</strong> pilih semua faktor prima yang sama dengan pangkat terkecil dari bilangan-bilangan tersebut.</div>
               )
             }
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 mt-7">

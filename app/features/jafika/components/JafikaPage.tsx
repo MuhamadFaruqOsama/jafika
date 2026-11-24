@@ -842,7 +842,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
             <FactorSelectionCard
               id="hasil-fpb"
               variant="FPB"
-              promptTitle="Pilih faktorisasi FPB di bawah ini."
+              promptTitle="Hitung FPB"
               factorOptions={game.factorOptions}
               selectedFactors={game.selectedFactors}
               onToggle={game.toggleFactor}
@@ -861,8 +861,8 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
               variant="KPK"
               promptTitle={
                 shouldAskFpb
-                  ? "Lanjutkan: pilih faktorisasi KPK di bawah ini."
-                  : "Pilih faktorisasi KPK di bawah ini."
+                  ? "Hitung KPK"
+                  : "Hitung KPK"
               }
               factorOptions={game.factorOptions}
               selectedFactors={game.selectedKpkFactors}
