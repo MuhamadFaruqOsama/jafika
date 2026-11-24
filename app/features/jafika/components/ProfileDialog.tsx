@@ -23,7 +23,7 @@ export function ProfileDialog() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-gray-100">
             <i className="hgi hgi-stroke hgi-user" />
-            Profil Pembuat
+            Profil Pengembang
           </div>
           <small className="text-sm text-gray-500 dark:text-gray-400">
             Profil pengembang dan dosen pembimbing.
@@ -51,6 +51,7 @@ export function ProfileDialog() {
                 alt="Alifah Fitria Nugraheni"
                 width={160}
                 height={200}
+                unoptimized
                 className="w-32 h-40 sm:w-36 sm:h-48 object-cover rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm shrink-0"
               />
               <div className="flex-1 space-y-2 text-left">
@@ -71,10 +72,11 @@ export function ProfileDialog() {
             {/* Profil Dosen Pembimbing */}
             <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start bg-gray-50/90 dark:bg-[#121214]/90 p-3 rounded-2xl border border-gray-200 dark:border-gray-800">
               <Image
-                src="/img/credits/pak%20yuli.jpeg"
+                src="/img/credits/pak-yuli.jpeg"
                 alt="Drs. Yuli Witanto, M.Pd."
                 width={160}
                 height={200}
+                unoptimized
                 className="w-32 h-40 sm:w-36 sm:h-48 object-cover rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm shrink-0"
               />
               <div className="flex-1 space-y-2 text-left">
