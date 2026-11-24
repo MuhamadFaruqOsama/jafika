@@ -191,7 +191,7 @@ function StellaModel({ onReady, animationTriggerTicks }: StellaModelProps) {
 
 export function JafikaThreeViewer({ onReady, animationTriggerTicks }: JafikaThreeViewerProps) {
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full pointer-events-none">
       <Canvas 
         camera={{ 
             position: [0, 0, 5], 

@@ -620,12 +620,12 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         <NumberPreviewBar numbers={previewNumbers} />
       )}
 
-      <div className="fixed -bottom-10 md:-bottom-12 -left-12 z-80 flex flex-col items-end gap-2 md:-right-10">
+      <div className="pointer-events-none fixed -bottom-10 md:-bottom-12 -left-12 md:left-auto md:-right-10 z-80 flex flex-col items-end gap-2 h-[40vh] md:h-[60vh]">
         {/* {!isShareMode && (
           <Button
             variant="secondary"
             data-sfx="none"
-            className="rounded-full px-4 py-1 text-sm font-semibold"
+            className="rounded-full px-4 py-1 text-sm font-semibold pointer-events-auto"
             onClick={() => game.toggleAssistant3d(!game.isAssistant3dEnabled)}
           >
             {game.isAssistant3dEnabled ? "Sembunyikan 3D" : "Lihat 3D"}
@@ -633,7 +633,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
         )} */}
 
         {is3dEnabled && (
-          <div className="h-[40vh] md:h-[60vh] aspect-3/4 max-h-140 min-h-70">
+          <div className="pointer-events-none h-[40vh] md:h-[60vh] aspect-3/4 max-h-140 min-h-70">
             <LazyJafikaThreeViewer
               onReady={() => {
                 setIsThreeReady(true);
@@ -842,7 +842,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
             <FactorSelectionCard
               id="hasil-fpb"
               variant="FPB"
-              promptTitle="Pilih faktor FPB di bawah ini."
+              promptTitle="Pilih faktorisasi FPB di bawah ini."
               factorOptions={game.factorOptions}
               selectedFactors={game.selectedFactors}
               onToggle={game.toggleFactor}
@@ -861,8 +861,8 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
               variant="KPK"
               promptTitle={
                 shouldAskFpb
-                  ? "Lanjutkan: pilih faktor KPK di bawah ini."
-                  : "Pilih faktor KPK di bawah ini."
+                  ? "Lanjutkan: pilih faktorisasi KPK di bawah ini."
+                  : "Pilih faktorisasi KPK di bawah ini."
               }
               factorOptions={game.factorOptions}
               selectedFactors={game.selectedKpkFactors}

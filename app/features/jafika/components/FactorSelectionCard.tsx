@@ -95,15 +95,24 @@ export function FactorSelectionCard({
           className="absolute -top-10 -left-3"
         />
       
-        <div className="mb-5 bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white mt-16 md:mt-0 md:ms-40">
-          {promptTitle}
+        <div className="mb-5 mt-16 md:mt-0 md:ms-40">
+          <div className="bg-pink-500 py-2 px-6 w-fit rounded-full font-semibold text-white">
+            {promptTitle}
+          </div>
+          {
+              variant === "KPK" ? (
+                <div className="font-normal text-sm px-6 text-gray-600 mt-1">Cara: Pilih faktorisasi terbesar</div>
+              ) : (
+                <div className="font-normal text-sm px-6 text-gray-600 mt-1">Cara: Pilih faktorisasi terkecil</div>
+              )
+            }
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 mt-7">
           {factorOptions.map((options, groupIndex) => (
             <div key={groupIndex} className="mb-3 md:mb-0">
               <div className="mb-2 text-gray-800 dark:text-white">
-                Faktor Bilangan {explanationNumbers[groupIndex] ?? groupIndex + 1}:
+                Faktorisasi Bilangan {explanationNumbers[groupIndex] ?? groupIndex + 1}:
               </div>
               <ul className="flex gap-3">
                 {options.map((factor, index) => {
