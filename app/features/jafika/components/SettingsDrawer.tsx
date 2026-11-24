@@ -2,6 +2,8 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ReaderPDF } from "./ReaderPDF";
 import { InstructionsDialog } from "./InstructionsDialog";
+import { ProfileDialog } from "./ProfileDialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type SettingsDrawerProps = {
   open: boolean;
@@ -78,32 +80,32 @@ export function SettingsDrawer({
       {open && <div className="fixed inset-0 z-30 bg-black/20" onClick={onClose} />}
       <div
         id="drawer-settings-jafika"
-        className={`fixed left-0 top-0 z-40 h-screen w-96 border-e border-gray-200 bg-white p-3 transition-transform dark:border-slate-700 dark:bg-black ${
+        className={`fixed left-0 top-0 z-40 h-dvh max-h-screen w-96 border-e border-gray-200 bg-white p-3 flex flex-col transition-transform dark:border-slate-700 dark:bg-black overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex flex-col gap-2 justify-between min-h-screen">
-          <div className="">
-            <div className="mb-5 pb-5 flex items-center justify-between border-b border-gray-500 dark:border-slate-600">
-              <h5
-                id="drawer-label"
-                className="inline-flex items-center gap-3 text-xl font-medium dark:text-gray-100"
-              >
-                <i className="hgi hgi-stroke hgi-settings-01" />
-                <span>
-                  <span className="font-bold text-pink-500">JAFIKA</span> Settings
-                </span>
-              </h5>
-              <button
-                type="button"
-                className="flex items-center justify-center h-9 w-9 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
-                onClick={onClose}
-                aria-label="Close menu"
-              >
-                <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={3} />
-              </button>
-            </div>
-            <div className="flex flex-col gap-3">
+        <div className="mb-4 pb-3 flex items-center justify-between border-b border-gray-200 dark:border-slate-700 shrink-0">
+          <h5
+            id="drawer-label"
+            className="inline-flex items-center gap-3 text-xl font-medium dark:text-gray-100"
+          >
+            <i className="hgi hgi-stroke hgi-settings-01" />
+            <span>
+              <span className="font-bold text-pink-500">JAFIKA</span> Settings
+            </span>
+          </h5>
+          <button
+            type="button"
+            className="flex items-center justify-center h-9 w-9 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={3} />
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 w-full overflow-hidden">
+          <ScrollArea className="h-full w-full" type="always">
+            <div className="flex flex-col gap-3 pr-3.5 pb-6">
               <ReaderPDF/>
               <InstructionsDialog/>
               <button
@@ -184,12 +186,11 @@ export function SettingsDrawer({
                 checked={darkMode}
                 onCheckedChange={onToggleDarkMode}
               /> */}
+              <div className="pt-2 border-t border-gray-200 dark:border-slate-800">
+                <ProfileDialog />
+              </div>
             </div>
-          </div>
-          {/* <div className="mb-5 text-center text-sm text-gray-700 dark:text-gray-300">
-            <div className="">&copy; 2026 Alifah Fitria Nugraheni. All Rights Reserved.</div>
-            <div className="">NIM: 2301050083</div>
-          </div> */}
+          </ScrollArea>
         </div>
       </div>
     </>
