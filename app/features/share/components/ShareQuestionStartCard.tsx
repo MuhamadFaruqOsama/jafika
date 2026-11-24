@@ -17,6 +17,8 @@ type ShareQuestionStartCardProps = {
   fpb_mode: boolean
   find_numbers: number[]
   assistant3d: boolean
+  cp?: string | null
+  tp?: string[]
 }
 
 type ApiResponse = {
@@ -36,6 +38,8 @@ export function ShareQuestionStartCard({
   fpb_mode,
   find_numbers,
   assistant3d,
+  cp,
+  tp,
 }: ShareQuestionStartCardProps) {
   const storageKey = useMemo(() => `jafika-share-session:${uuid}`, [uuid])
   const [name, setName] = useState("")
@@ -133,6 +137,8 @@ export function ShareQuestionStartCard({
           fpbMode: fpb_mode,
           findNumbers: find_numbers,
           assistant3dEnabled: assistant3d,
+          cp: cp ?? null,
+          tp: tp ?? [],
         }}
       />
     )
@@ -164,7 +170,26 @@ export function ShareQuestionStartCard({
           <p>Dibuat oleh: <span>{creatorName}</span></p>
         </div>
         <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-        <p>{description}</p>
+
+        {cp && (
+          <div className="mt-3">
+            <p className="font-semibold text-gray-900">Capaian Pembelajaran:</p>
+            <p className="text-gray-700 mt-0.5">{cp}</p>
+          </div>
+        )}
+
+        {Array.isArray(tp) && tp.length > 0 && (
+          <div className="mt-3">
+            <p className="font-semibold text-gray-900">Tujuan Pembelajaran:</p>
+            <ol className="list-decimal list-inside space-y-0.5 text-gray-700 mt-0.5">
+              {tp.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        <p className="mt-3 text-gray-700">{description}</p>
       </div>
 
       <form className="mt-6" onSubmit={handleSubmit}>

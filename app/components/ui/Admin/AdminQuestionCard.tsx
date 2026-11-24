@@ -38,6 +38,8 @@ type QuestionCardItem = {
   thumbnail: string | null
   public_access: boolean
   "3d_assistant": boolean
+  cp?: string | null
+  tp?: unknown
   created_at: string
   created_at_label: string
 }
@@ -241,6 +243,8 @@ export function AdminQuestionCard({ question }: AdminQuestionCardProps) {
                 find_number: question.find_number,
                 public_access: question.public_access,
                 assistant_3d: question["3d_assistant"],
+                cp: question.cp,
+                tp: question.tp,
               }}
             />
         </div>

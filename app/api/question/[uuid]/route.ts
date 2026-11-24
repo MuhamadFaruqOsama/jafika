@@ -172,21 +172,40 @@ export async function PATCH(request: Request, context: RouteContext) {
       thumbnail = await uploadQuestionThumbnail(thumbnailFile)
     }
 
+    const updatePayload: Record<string, unknown> = {
+      title,
+      description,
+      creator_name: creatorName || "Pengguna",
+      kpk_mode: kpkMode,
+      fpb_mode: fpbMode,
+      find_number: normalizedFindNumber,
+      material,
+      thumbnail,
+      public_access: publicAccess,
+      "3d_assistant": assistant3d,
+      updated_at: new Date().toISOString(),
+    }
+
+    const rawCp = formData.get("cp")
+    if (rawCp !== null) {
+      updatePayload.cp = String(rawCp).trim() || null
+    }
+
+    const rawTp = formData.get("tp")
+    if (rawTp !== null) {
+      try {
+        const parsedTp = JSON.parse(String(rawTp))
+        updatePayload.tp = Array.isArray(parsedTp)
+          ? parsedTp.map(String).map((s) => s.trim()).filter(Boolean)
+          : []
+      } catch {
+        updatePayload.tp = []
+      }
+    }
+
     const { error: updateError } = await supabase
       .from("question")
-      .update({
-        title,
-        description,
-        creator_name: creatorName || "Pengguna",
-        kpk_mode: kpkMode,
-        fpb_mode: fpbMode,
-        find_number: normalizedFindNumber,
-        material,
-        thumbnail,
-        public_access: publicAccess,
-        "3d_assistant": assistant3d,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", currentQuestion.id)
 
     if (updateError) {

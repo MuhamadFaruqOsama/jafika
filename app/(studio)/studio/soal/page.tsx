@@ -15,6 +15,8 @@ type QuestionRow = {
   thumbnail: string | null;
   public_access: boolean;
   "3d_assistant": boolean;
+  cp?: string | null;
+  tp?: unknown;
   created_at: string;
   created_at_label: string;
 };
@@ -41,7 +43,7 @@ export default async function Soal() {
     const { data: questions } = authUserId
       ? await supabase
           .from("question")
-          .select('id, uuid, title, description, material, kpk_mode, fpb_mode, find_number, thumbnail, public_access, "3d_assistant", created_at')
+          .select('id, uuid, title, description, material, kpk_mode, fpb_mode, find_number, thumbnail, public_access, "3d_assistant", created_at, cp, tp')
           .eq("user_id", authUserId)
           .order("created_at", { ascending: false })
       : { data: [] };

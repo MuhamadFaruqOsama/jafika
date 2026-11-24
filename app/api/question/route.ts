@@ -103,22 +103,41 @@ export async function POST(request: Request) {
       "Pengguna",
     ).trim()
 
+    const insertPayload: Record<string, unknown> = {
+      uuid: randomUUID(),
+      user_id: ownerId,
+      creator_name: creatorName || "Pengguna",
+      title,
+      kpk_mode: kpkMode,
+      fpb_mode: fpbMode,
+      description,
+      material,
+      find_number: normalizedFindNumber,
+      thumbnail,
+      public_access: publicAccess,
+      "3d_assistant": assistant3d,
+    }
+
+    const rawCp = formData.get("cp")
+    if (rawCp !== null) {
+      insertPayload.cp = String(rawCp).trim() || null
+    }
+
+    const rawTp = formData.get("tp")
+    if (rawTp !== null) {
+      try {
+        const parsedTp = JSON.parse(String(rawTp))
+        insertPayload.tp = Array.isArray(parsedTp)
+          ? parsedTp.map(String).map((s) => s.trim()).filter(Boolean)
+          : []
+      } catch {
+        insertPayload.tp = []
+      }
+    }
+
     const { data: createdQuestion, error: createQuestionError } = await supabase
       .from("question")
-      .insert({
-        uuid: randomUUID(),
-        user_id: ownerId,
-        creator_name: creatorName || "Pengguna",
-        title,
-        kpk_mode: kpkMode,
-        fpb_mode: fpbMode,
-        description,
-        material,
-        find_number: normalizedFindNumber,
-        thumbnail,
-        public_access: publicAccess,
-        "3d_assistant": assistant3d,
-      })
+      .insert(insertPayload)
       .select("id, uuid")
       .single()
 

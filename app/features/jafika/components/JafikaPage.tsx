@@ -48,6 +48,8 @@ export type JafikaShareConfig = {
   fpbMode: boolean;
   findNumbers?: number[];
   assistant3dEnabled: boolean;
+  cp?: string | null;
+  tp?: string[] | null;
 };
 
 type JafikaPageProps = {
@@ -690,7 +692,23 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
-                    <p className="mt-2 text-gray-700">{shareConfig.description}</p>
+                    {shareConfig.cp && (
+                      <div className="mt-3">
+                        <p className="font-semibold text-gray-900">Capaian Pembelajaran:</p>
+                        <p className="text-gray-700 mt-0.5">{shareConfig.cp}</p>
+                      </div>
+                    )}
+                    {Array.isArray(shareConfig.tp) && shareConfig.tp.length > 0 && (
+                      <div className="mt-3">
+                        <p className="font-semibold text-gray-900">Tujuan Pembelajaran:</p>
+                        <ol className="list-decimal list-inside space-y-0.5 text-gray-700 mt-0.5">
+                          {shareConfig.tp.map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+                    <p className="mt-3 text-gray-700">{shareConfig.description}</p>
                     <p className="mt-3 text-gray-600">
                       Peserta: <span>{shareConfig.participantName}</span>
                     </p>

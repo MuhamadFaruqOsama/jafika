@@ -14,6 +14,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { AddInvoiceIcon } from "@hugeicons/core-free-icons"
 import { InputAdmin } from "./InputAdmin"
 import { TextAreaAdmin } from "./TextAreaAdmin"
+import { InputTpAdmin } from "./InputTpAdmin"
 import { QuestionTypeAdmin } from "./QuestionTypeAdmin"
 import { InputCorrectNumber } from "./InputCorrectNumber"
 import { AdditionalSettingsAdmin } from "./AdditionalSettingsAdmin"
@@ -29,6 +30,8 @@ type EditQuestionPayload = {
   find_number: unknown
   public_access: boolean
   assistant_3d: boolean
+  cp?: string | null
+  tp?: unknown
 }
 
 type DialogEditQuestionProps = {
@@ -67,6 +70,8 @@ export function DialogEditQuestion({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [cp, setCp] = useState("")
+  const [tpList, setTpList] = useState<string[]>([""])
   const [kpkMode, setKpkMode] = useState(true)
   const [fpbMode, setFpbMode] = useState(true)
   const [pemfaktoranMode, setPemfaktoranMode] = useState(false)
@@ -115,6 +120,11 @@ export function DialogEditQuestion({
     const isPem = !question.kpk_mode && !question.fpb_mode
     setTitle(question.title)
     setDescription(question.description)
+    setCp(question.cp ?? "")
+    const initialTp = Array.isArray(question.tp)
+      ? (question.tp as unknown[]).map(String).filter((s) => s.trim().length > 0)
+      : []
+    setTpList(initialTp.length > 0 ? initialTp : [""])
     setKpkMode(question.kpk_mode)
     setFpbMode(question.fpb_mode)
     setPemfaktoranMode(isPem)
@@ -149,6 +159,11 @@ export function DialogEditQuestion({
       const formData = new FormData()
       formData.append("title", title)
       formData.append("description", description)
+      formData.append("cp", cp.trim())
+      formData.append(
+        "tp",
+        JSON.stringify(tpList.map((item) => item.trim()).filter((item) => item.length > 0))
+      )
       formData.append("kpkMode", String(kpkMode))
       formData.append("fpbMode", String(fpbMode))
       formData.append("findNumber", JSON.stringify(pemfaktoranMode ? [findNumber[0]] : findNumber))
@@ -219,6 +234,18 @@ export function DialogEditQuestion({
             description="Masukkan soal deskripsi yang harus dipecahkan."
             value={description}
             onValueChange={setDescription}
+          />
+          <TextAreaAdmin
+            label="Capaian Pembelajaran (CP)"
+            id="edit-cp"
+            placeholder="Contoh: Peserta didik dapat memahami konsep faktor dan kelipatan, menentukan faktorisasi prima..."
+            description="Deskripsi capaian pembelajaran Kurikulum Merdeka (opsional)."
+            value={cp}
+            onValueChange={setCp}
+          />
+          <InputTpAdmin
+            values={tpList}
+            onValuesChange={setTpList}
           />
           <InputCorrectNumber
             values={findNumber}

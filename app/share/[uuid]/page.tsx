@@ -20,6 +20,8 @@ type SharedQuestion = {
   kpk_mode: boolean
   fpb_mode: boolean
   "3d_assistant": boolean
+  cp?: string | null
+  tp?: unknown
 }
 
 function normalizeFindNumber(value: unknown) {
@@ -28,6 +30,11 @@ function normalizeFindNumber(value: unknown) {
   return value
     .map((item) => Number(item))
     .filter((item) => Number.isFinite(item) && item > 0)
+}
+
+function normalizeTp(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.map((item) => String(item).trim()).filter(Boolean)
 }
 
 export default async function SharePage({ params }: SharePageProps) {
@@ -41,7 +48,7 @@ export default async function SharePage({ params }: SharePageProps) {
   const supabase = createAdminClient()
   const { data: question } = await supabase
     .from("question")
-    .select('uuid, title, description, creator_name, material, thumbnail, find_number, public_access, kpk_mode, fpb_mode, "3d_assistant"')
+    .select('uuid, title, description, creator_name, material, thumbnail, find_number, public_access, kpk_mode, fpb_mode, "3d_assistant", cp, tp')
     .eq("uuid", normalizedUuid)
     .maybeSingle<SharedQuestion>()
 
@@ -62,6 +69,7 @@ export default async function SharePage({ params }: SharePageProps) {
   }
 
   const creatorName = question.creator_name?.trim() || "Pengguna"
+  const normalizedTp = normalizeTp(question.tp)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -76,6 +84,8 @@ export default async function SharePage({ params }: SharePageProps) {
         fpb_mode={question.fpb_mode}
         find_numbers={normalizedCorrectNumbers}
         assistant3d={question["3d_assistant"]}
+        cp={question.cp ?? null}
+        tp={normalizedTp}
       />
     </div>
   )

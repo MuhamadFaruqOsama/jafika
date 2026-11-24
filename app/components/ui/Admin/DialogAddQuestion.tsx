@@ -17,6 +17,7 @@ import { InputAdmin } from "./InputAdmin"
 import { TextAreaAdmin } from "./TextAreaAdmin"
 import { QuestionTypeAdmin } from "./QuestionTypeAdmin"
 import { InputCorrectNumber } from "./InputCorrectNumber"
+import { InputTpAdmin } from "./InputTpAdmin"
 import { AdditionalSettingsAdmin } from "./AdditionalSettingsAdmin"
 import { toast } from "sonner"
 
@@ -39,6 +40,8 @@ export function DialogAddQuestion() {
     const [materialFile, setMaterialFile] = useState<File | null>(null)
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
     const [clearFileSignal, setClearFileSignal] = useState(0)
+    const [cp, setCp] = useState("")
+    const [tpList, setTpList] = useState<string[]>([""])
 
     const handleKpkChange = (checked: boolean) => {
       setKpkMode(checked)
@@ -84,6 +87,8 @@ export function DialogAddQuestion() {
       setMaterialFile(null)
       setThumbnailFile(null)
       setClearFileSignal((prev) => prev + 1)
+      setCp("")
+      setTpList([""])
     }
 
     const handleSubmit = async () => {
@@ -114,6 +119,8 @@ export function DialogAddQuestion() {
         formData.append("findNumber", JSON.stringify(pemfaktoranMode ? [findNumber[0]] : findNumber))
         formData.append("publicAccess", String(publicAccess))
         formData.append("assistant3d", String(assistant3d))
+        formData.append("cp", cp.trim())
+        formData.append("tp", JSON.stringify(tpList.map((s) => s.trim()).filter(Boolean)))
 
         if (materialFile) {
           formData.append("material", materialFile)
@@ -185,6 +192,18 @@ export function DialogAddQuestion() {
                         description="Masukkan soal deskripsi yang harus dipecahkan."
                         value={description}
                         onValueChange={setDescription}
+                    />
+                    <TextAreaAdmin
+                        label="Capaian Pembelajaran (CP)"
+                        id="cp"
+                        placeholder="Contoh: Peserta didik dapat memahami konsep faktor dan kelipatan, menentukan faktorisasi prima..."
+                        description="Deskripsi capaian pembelajaran Kurikulum Merdeka (opsional)."
+                        value={cp}
+                        onValueChange={setCp}
+                    />
+                    <InputTpAdmin
+                        values={tpList}
+                        onValuesChange={setTpList}
                     />
                     <InputCorrectNumber
                       values={findNumber}
