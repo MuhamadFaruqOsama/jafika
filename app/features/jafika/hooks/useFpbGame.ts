@@ -259,7 +259,18 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     const divider = Number.parseInt(dividerText, 10);
 
     if (!Number.isInteger(divider) || divider < 2) {
-      const message = "Belum tepat. Coba periksa kembali bilangan prima yang kamu gunakan untuk menguraikan 24"
+      const targetNumbers = numberInputs
+        .map((value) => Number.parseInt(value.trim(), 10))
+        .filter((value) => Number.isInteger(value) && value > 0);
+
+      const targetText =
+        targetNumbers.length > 0
+          ? targetNumbers.join(", ")
+          : workingNumbers.length > 0
+            ? workingNumbers.join(", ")
+            : "bilangan";
+
+      const message = `Belum tepat. Coba periksa kembali bilangan prima yang kamu gunakan untuk menguraikan ${targetText}`;
       showError(message);
       return;
     }

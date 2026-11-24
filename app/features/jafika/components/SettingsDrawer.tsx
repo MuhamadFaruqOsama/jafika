@@ -1,6 +1,7 @@
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ReaderPDF } from "./ReaderPDF";
+import { InstructionsDialog } from "./InstructionsDialog";
 
 type SettingsDrawerProps = {
   open: boolean;
@@ -104,6 +105,7 @@ export function SettingsDrawer({
             </div>
             <div className="flex flex-col gap-3">
               <ReaderPDF/>
+              <InstructionsDialog/>
               <button
                 className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
                 type="button"
@@ -184,10 +186,10 @@ export function SettingsDrawer({
               /> */}
             </div>
           </div>
-          <div className="mb-5 text-center text-sm text-gray-700 dark:text-gray-300">
+          {/* <div className="mb-5 text-center text-sm text-gray-700 dark:text-gray-300">
             <div className="">&copy; 2026 Alifah Fitria Nugraheni. All Rights Reserved.</div>
             <div className="">NIM: 2301050083</div>
-          </div>
+          </div> */}
         </div>
       </div>
     </>
