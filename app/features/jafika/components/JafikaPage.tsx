@@ -717,7 +717,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                       <div className="px-4 py-1 bg-pink-100 text-black rounded-full w-fit">
                         1. Tentuin jenis faktorisasinya dulu yaa
                       </div>
-                      <small className="text-gray-500 ms-3">Berdasarkan soal tersebut, faktorisasi mana yang tepat? Apakah KPK? atau FPB? atau dua-duanya?</small>
+                      <small className="text-gray-500 ms-3">Tentukan jenisnya dulu yaa. Berdasarkan soal tersebut, yang harus ditentukan adalah KPK atau FPB?</small>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                         <FieldLabel>
@@ -757,7 +757,7 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                       <div className="px-4 py-1 bg-pink-100 text-black rounded-full w-fit mt-10">
                         2. Lalu Tentuin bilangannya
                       </div>
-                      <small className="text-gray-500 ms-3">Tentukan ada berapa bilangan yang difaktorisasi dan berapa saja ya kira-kira?</small>
+                      <small className="text-gray-500 ms-3">Ada berapa bilangan yang akan digunakan? Yuk, masukkan bilangannya!</small>
                     </>
                   )
                 }

@@ -259,7 +259,8 @@ export function useFpbGame(options?: UseFpbGameOptions) {
     const divider = Number.parseInt(dividerText, 10);
 
     if (!Number.isInteger(divider) || divider < 2) {
-      showError("Masukkan angka pembagi valid (minimal 2).");
+      const message = "Belum tepat. Coba periksa kembali bilangan prima yang kamu gunakan untuk menguraikan 24"
+      showError(message);
       return;
     }
 

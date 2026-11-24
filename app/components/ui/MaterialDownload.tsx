@@ -43,10 +43,11 @@ export function MaterialDownload({ materialPath }: MaterialDownloadProps) {
 
             <div className="min-w-0 flex-1">
                 <p className="font-medium text-black">
-                Klik untuk mendownload Materi
+                Belajar dulu yuk!
                 </p>
                 <p className="line-clamp-1 text-sm text-gray-500 break-all">
-                {fileName}
+                {/* {fileName} */}
+                Kamu bisa klik di sini ya!
                 </p>
             </div>
         </a>

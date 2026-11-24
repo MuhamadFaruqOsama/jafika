@@ -178,7 +178,7 @@ export async function PATCH(request: Request, context: RouteContext) {
           submittedFpbMode === question.fpb_mode
 
         if (!isModeMatched) {
-          return jsonError("Mode yang dipilih belum sesuai dengan soal.", 400)
+          return jsonError("Jenis yang dipilih belum sesuai dengan soal.", 400)
         }
 
         const expectedNumbers = normalizeFindNumber(question.find_number)

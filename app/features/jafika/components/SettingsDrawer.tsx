@@ -1,5 +1,6 @@
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { ReaderPDF } from "./ReaderPDF";
 
 type SettingsDrawerProps = {
   open: boolean;
@@ -57,6 +58,7 @@ function ToggleRow({
   );
 }
 
+
 export function SettingsDrawer({
   open,
   onClose,
@@ -101,6 +103,7 @@ export function SettingsDrawer({
               </button>
             </div>
             <div className="flex flex-col gap-3">
+              <ReaderPDF/>
               <button
                 className="cursor-pointer rounded-md p-3 text-left hover:bg-gray-100 dark:hover:bg-slate-800/60"
                 type="button"
