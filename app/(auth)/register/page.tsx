@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next-nprogress-bar";
 import { toast } from "sonner";
 import { AuthFormCard } from "@/app/features/auth/components/AuthFormCard";
-import { HeaderAuth } from "@/app/components/ui/HeaderAuth";
 import { createClient } from "@/lib/client";
 
 const REGISTER_FIELDS = [
@@ -101,43 +99,18 @@ export default function RegisterPage() {
   // - kembalikan state/loading + handleGoogleSignIn + extraActions button
 
   return (
-    <div className="w-full max-w-md rounded-4xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800/50 dark:bg-black/40">
-      <HeaderAuth
-        title="Daftar"
-        description="Buat akun baru untuk melanjutkan."
-      />
-
-      {/* Form registrasi dinonaktifkan sementara */}
-      {/*
-      <AuthFormCard
-        title="Daftar"
-        description="Buat akun baru untuk melanjutkan."
-        submitLabel={isSubmitting ? "Memproses..." : "Daftar"}
-        fields={REGISTER_FIELDS}
-        footerText="Sudah punya akun?"
-        footerLinkText="Login"
-        footerHref="/login"
-        onSubmit={handleRegister}
-        submitDisabled={isSubmitting}
-        values={formValues}
-        onFieldChange={handleFieldChange}
-      />
-      */}
-
-      <div className="my-8 text-center space-y-2">
-        <p className="text-gray-600 dark:text-gray-300">
-          Mohon maaf, saat ini service sedang tidak dapat diakses.
-        </p>
-      </div>
-
-      <div className="border-t border-gray-200 pt-5 dark:border-gray-800">
-        <p className="text-center text-gray-500 dark:text-gray-300">
-          Sudah punya akun?{" "}
-          <Link href="/login" className="font-semibold text-pink-500 hover:underline">
-            Login
-          </Link>
-        </p>
-      </div>
-    </div>
+    <AuthFormCard
+      title="Daftar"
+      description="Buat akun baru untuk melanjutkan."
+      submitLabel={isSubmitting ? "Memproses..." : "Daftar"}
+      fields={REGISTER_FIELDS}
+      footerText="Sudah punya akun?"
+      footerLinkText="Login"
+      footerHref="/login"
+      onSubmit={handleRegister}
+      submitDisabled={isSubmitting}
+      values={formValues}
+      onFieldChange={handleFieldChange}
+    />
   );
 }

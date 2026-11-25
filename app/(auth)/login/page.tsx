@@ -68,10 +68,9 @@ export default function LoginPage() {
       description="Masukkan email dan password Anda untuk melanjutkan."
       submitLabel={isSubmitting ? "Memproses..." : "Masuk"}
       fields={LOGIN_FIELDS}
-      // Link ke register dinonaktifkan sementara:
-      // footerText="Belum punya akun?"
-      // footerLinkText="Daftar"
-      // footerHref="/register"
+      footerText="Belum punya akun?"
+      footerLinkText="Daftar"
+      footerHref="/register"
       onSubmit={handleLogin}
       submitDisabled={isSubmitting}
       values={formValues}
