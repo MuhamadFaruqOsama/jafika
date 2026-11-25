@@ -691,7 +691,6 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                     <MaterialDownload materialPath={shareConfig.material} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
                     {shareConfig.cp && (
                       <div className="mt-3">
                         <p className="font-semibold text-gray-900">Capaian Pembelajaran:</p>
@@ -708,7 +707,10 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
                         </ol>
                       </div>
                     )}
-                    <p className="mt-3 text-gray-700">{shareConfig.description}</p>
+                    <div className="mt-3">
+                      <h2 className="text-xl font-semibold text-gray-900">{shareConfig.title}</h2>
+                      <p className="text-gray-700">{shareConfig.description}</p>
+                    </div>
                     <p className="mt-3 text-gray-600">
                       Peserta: <span>{shareConfig.participantName}</span>
                     </p>
