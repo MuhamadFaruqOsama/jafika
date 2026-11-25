@@ -50,6 +50,7 @@ export type JafikaShareConfig = {
   assistant3dEnabled: boolean;
   cp?: string | null;
   tp?: string[] | null;
+  onResetSession?: () => void;
 };
 
 type JafikaPageProps = {
@@ -572,6 +573,18 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
     }, 2000);
   };
 
+  const handleResetShareSession = () => {
+    if (!isShareMode || !shareConfig) return;
+    window.localStorage.removeItem(shareConfig.sessionStorageKey);
+    toast.dismiss("jafika-3d-loading");
+    toast.success("Sesi direset. Silakan masukkan nama peserta.");
+    if (shareConfig.onResetSession) {
+      shareConfig.onResetSession();
+      return;
+    }
+    window.location.reload();
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-gray-100 dark:bg-[#121212]">
       <LoaderOverlay visible={loading} />
@@ -918,8 +931,19 @@ export function JafikaPage({ shareConfig }: JafikaPageProps) {
           )}
 
           {isGameWon && (
-            <div className="bg-green-100 text-green-900 font-medium text-lg py-2 text-center border border-green-300 rounded-xl mt-5">
-              Selamat, Kamu telah berhasil menyelesaikan soal ini!
+            <div className="mt-5 space-y-4">
+              <div className="bg-green-100 text-green-900 font-medium text-lg py-2 text-center border border-green-300 rounded-xl">
+                Selamat, Kamu telah berhasil menyelesaikan soal ini!
+              </div>
+              {isShareMode && shareConfig && (
+                <Button
+                  variant="secondary"
+                  className="w-full justify-center rounded-full py-2 text-xl font-bold"
+                  onClick={handleResetShareSession}
+                >
+                  Mulai dari awal
+                </Button>
+              )}
             </div>
           )}
         </div>

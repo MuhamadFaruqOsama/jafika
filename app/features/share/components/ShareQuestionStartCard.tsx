@@ -120,6 +120,13 @@ export function ShareQuestionStartCard({
     }
   }
 
+  const handleResetSession = () => {
+    window.localStorage.removeItem(storageKey)
+    setParticipantId(null)
+    setParticipantName("")
+    setName("")
+  }
+
   if (participantId) {
     return (
       <JafikaPage
@@ -139,6 +146,7 @@ export function ShareQuestionStartCard({
           assistant3dEnabled: assistant3d,
           cp: cp ?? null,
           tp: tp ?? [],
+          onResetSession: handleResetSession,
         }}
       />
     )
